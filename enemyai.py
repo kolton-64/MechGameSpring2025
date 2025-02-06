@@ -44,4 +44,3 @@ class DecisionMaker:
 	def Main_Is_Best():
 		#if main is best return true
 	def Create_Enemy(type=None):
-		
