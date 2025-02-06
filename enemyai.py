@@ -1,6 +1,7 @@
 #Files for functions, classes, and methods used by the enemy for
 #decision making.
 #################################80CHAR#########################################
+import random
 
 class DecisionMaker:
 	#set up variables
