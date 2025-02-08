@@ -7,23 +7,35 @@
 #
 
 class Weapon:
-	# weapongRange = attackPattern? rename?
+	# weaponRange rename?
 	# add ammoCapacity for weapons requiring ammunition?
 	def __init__(self, name, damage, weaponRange):
 		self.name = name
 		self.damage = damage
-		self.weaponRange = weaponRange
+		self.weaponRange = [] # name attackZone?
+
+	def getWeaponRange(self):
+		return self.weaponRange
 
 	# weapon attack logic? or will that be in combat/player/ect file?
+	def weaponAttack(self, occupantPosition):
+		# temporary basic weapon attack logic, text (always hits static zone) 
+		if occupantPosition in self.weaponRange:
+			# Hit = character damage == weaponDamage
+			print(f"{self.name} hit at tile: {occupantPosition} for {self.damage} damage.")
+		else:
+			# Miss = no character damage
+			print(f"{self.name} missed at tile: {occupantPosition}.")
+
 
 class Bolter(Weapon):
 # weapon #1: Bolter: base dmg, Straight line attack on grid, ammo?
 
 	def __init__(self):
 		super().__init__(
-			name = "Bolter",
-			# damage = 1,
-			# weaponRange = [],
+			name = "Bolter", #placeholder
+			damage = 2, # temp
+			weaponRange = [(1, 0), (1, 1), (1, 2)], # middle row for now
 			)
 
 class MeleeWeapon1(Weapon):
@@ -32,16 +44,21 @@ class MeleeWeapon1(Weapon):
 	def __init__(self):
 		super().__init__(
 			name = "MeleeWeapon1", #placeholder
-			# damage = 3,
-			# weaponRange = [], # single?
+			damage = 3, # temp
+			weaponRange = [(0, 0), (1, 0), (2, 0)], # single? (first column for now)
 			)
 
 class AOEWeapon1(Weapon):
-# weapon #1: AOEWeapon1(placeholder, Flamer, Assault-Cannon, etc.: , base dmg?, Multi-tile pattern attack(AOE).
+# weapon #3: AOEWeapon1(placeholder, Flamer, Assault-Cannon, etc.: , base dmg?, Multi-tile pattern attack(AOE).
 
 	def __init__(self):
 		super().__init__(
 			name = "AOEWeapon1",
-			# damage = 1,
-			# weaponRange = [],
+			damage = 1, # temp
+			weaponRange = [ # back 2 columns for now
+				(0, 1), (0, 2),
+				(1, 1), (1, 2),
+				(2, 1), (2, 2)
+			], 
 			)
+
