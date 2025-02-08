@@ -1,0 +1,17 @@
+#mac and windows OS files
+.DS_Store
+Thumbs.db
+
+#hidden
+._*
+
+
+# VS code cache
+.vs/
+.vscode/
+
+
+# dont ignore this file
+!.gitignore
+
+# Updated gitignore
