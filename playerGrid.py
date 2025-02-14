@@ -1,13 +1,10 @@
 class PlayerGrid:
     def __init__(self):
-        
-        self.rows = 3  
-        self.cols = 3 
-        self.grid = []  # an empty grid
+        #Initialize a 3x3 grid with the player in the center
+        self.grid = [[0 for _ in range(3)] for _ in range(3)]
+        self.player_position = (1, 1)  # Default to center
+        self.grid[1][1] = 1  # Mark player location
 
-        # 3x3 grid filled with 0s
-        for i in range(self.rows):
-            row = []
-            for j in range(self.cols):
-                row.append(0)
-            self.grid.append(row)
+    def get_player_position(self):
+        #Returns the current player position as (row, col)
+        return self.player_position
