@@ -4,6 +4,8 @@
 # to use, import weapons via weapon class
 # ie:
 # from weapons import Bolter, MeleeWeapon1, AOEWeapon1
+# or 
+# from weapons import Weapon
 #
 
 class Weapon:
@@ -18,7 +20,7 @@ class Weapon:
 		return self.weaponRange
 
 	# weapon attack logic? or will that be in combat/player/ect file?
-	def weaponAttack(self, occupantPosition):
+	def weaponAttack(self, occupantPosition, targetDreadnought):
 		# temporary basic weapon attack logic, text (always hits static zone) 
 		if occupantPosition in self.weaponRange:
 			# Hit = character damage == weaponDamage
@@ -59,6 +61,20 @@ class AOEWeapon1(Weapon):
 				(0, 1), (0, 2),
 				(1, 1), (1, 2),
 				(2, 1), (2, 2)
+			], 
+			)
+
+class AssaultCannon(Weapon):
+# weapon #4: AOEWeapon2(placeholder, Flamer, Assault-Cannon, etc.: , base dmg?, Multi-tile pattern attack(AOE).
+
+	def __init__(self):
+		super().__init__(
+			name = "AssaultCannon",
+			damage = 2, # temp
+			weaponRange = [ # every other tile hit. (scatter)
+				(0, 0), (0, 2),
+				(1, 1),
+				(2, 0), (2, 2)
 			], 
 			)
 
