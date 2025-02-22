@@ -6,7 +6,12 @@ from weapons import Weapon
 
 class Dreadnought:
 	#
+	# playerWeaponPairSynergyMap = {
+		# frozenset(["ExampleWeapon1", "ExampleWeapon2"]): "ExampleWeaponSynergyAttack1",
+		# frozenset(["ExampleWeaponA", "ExampleWeaponB"]): "ExampleWeaponSynergyAttack2",
+	# }
 	#
+	
 	def __init__(self, name, HealthPoints, leftWeapon, rightWeapon):
 		self.name = name
 		self.HealthPoints = HealthPoints

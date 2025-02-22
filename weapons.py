@@ -29,6 +29,26 @@ class Weapon:
 			# Miss = no character damage
 			print(f"{self.name} missed at tile: {occupantPosition}.")
 
+	def displayWeaponStats(self):
+		# FR#22 When weapon is selected and indicator will present the stats and attack pattern
+		# will need to visually indicate, but for now just print
+		print(f"Selected Weapon: {self.name}")
+		print(f"Weapon Damage: {self.damage}")
+		self.displayWeaponAttackGrid # needs integration with pygame / visuals
+
+	def displayWeaponAttackGrid(self):
+		# shows grid representation of weapon attack zone(1's = hit zone)
+		print(f"{self.name}: Attack Pattern:")
+		for row in range(3):
+			rowRepr = []
+			for col in range(3):
+				if (row, col) in self.weaponRange:
+					rowRepr.append("1")
+				else:
+					rowRepr.append("0")
+			print(" ".join(rowRepr))
+		print()
+
 
 class Bolter(Weapon):
 # weapon #1: Bolter: base dmg, Straight line attack on grid, ammo?
