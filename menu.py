@@ -1,3 +1,4 @@
+import sys
 import pygame
 import pygame_menu
 from pygame_menu import themes
@@ -10,13 +11,26 @@ class MenuType(Enum):
 	IN_GAME = 3
 
 class Difficulty(Enum):
-	EASY = 0
-	MEDIUM = 1
-	HARD = 2
+	EASY = (0, "Easy")
+	MEDIUM = (1, "Medium")
+	HARD = (2, "Hard")
 
+	def __init__(self, int, string):
+		self.int = int
+		self.string = string
+
+'''
+	Menu Controller
+
+		- creates game menus using pygame_menu library 
+			- link: https://pygame-menu.readthedocs.io/en/3.5.2/index.html
+		- keeps track of current menu
+		- only draws menu when a menu is supposed to be active
+'''
 
 class MenuController: 
-	def __init__(self, screen):
+	def __init__(self, pg, screen):
+		self.pg = pg
 		self.screen = screen
 		self.width = screen.get_width()
 		self.height = screen.get_height()
@@ -55,7 +69,7 @@ class MenuController:
 					self.setMenu(MenuType.IN_GAME)
 
 		# Only draw the menu if the menu has been properly set
-		if self.menu != MenuType.EMPTY and type(self.menu) == pygame_menu.menu.Menu:
+		if self.menu != MenuType.EMPTY:
 			self.drawMenu(events)
 
 
@@ -68,24 +82,82 @@ class MenuController:
 				self._initInGameMenu()
 
 	def drawMenu(self, events):
-		print(type(MenuType))
 		self.menu.update(events)
 		if(type(self.menu) == pygame_menu.menu.Menu):
 			self.menu.draw(self.screen)
 
 
+	# Landing page menus
+
+	# Main menu where player can change difficult, enter game, or exit
 	def _initMainMenu(self):
-		print("Current Difficulty Level: ", self.difficulty)
+		# indicate main menu stage
+		self.stage = 0  
+
+		# define pygame menu
 		self.menu = pygame_menu.Menu(
-			"Welcome, Pilot!",
+			"Rogue Dreadnaught",
 			self.width, self.height,
 			theme=themes.THEME_BLUE
 		)
+
+		# define buttons and onclick functions
 		self.menu.add.button('Play', self._play)
 		self.menu.add.button("Change Difficulty", self._initDifficultyMenu)
 		self.menu.add.button("Exit", self._terminate)
+
 		print(" - Initialized main menu - ")
 
+	# Start the game
+	def _play(self):
+		# discard the current menu 
+		self.menu = MenuType.EMPTY
+
+		# set the menu stage to the in game menu index 1
+		self.stage = 1
+
+		# deactivate menu's
+		self.active = False
+		print(" - Beginning game - ")
+
+	def _terminate(self):
+		self.pg.quit()
+		print("PYGAME TERMINATED")
+		sys.exit()
+
+	def _initDifficultyMenu(self):
+		self.menu = pygame_menu.Menu(
+			"Select Difficulty",
+			self.width, self.height,
+			theme=themes.THEME_BLUE
+		)
+
+		message = f"Difficulty: {self.difficulty.string}"
+
+		self.menu.add.label(message)
+
+		# needed to declare individual functions to avoid immediate callback
+		self.menu.add.button("Easy", self._setDifficultyEasy)
+		self.menu.add.button("Medium", self._setDifficultyMedium)
+		self.menu.add.button("Hard", self._setDifficultyHard)
+		self.menu.add.button("Back", self._initMainMenu)
+
+		print(" - Initialized difficulty menu - ")
+	
+	def _setDifficultyEasy(self):
+		self.difficulty = Difficulty.EASY
+		self._initDifficultyMenu()
+
+	def _setDifficultyMedium(self):
+		self.difficulty = Difficulty.MEDIUM
+		self._initDifficultyMenu()
+
+	def _setDifficultyHard(self):
+		self.difficulty = Difficulty.HARD
+		self._initDifficultyMenu()
+
+
+	# In game menus
 
 	def _initInGameMenu(self):
 		self.menu = pygame_menu.Menu(
@@ -100,39 +172,8 @@ class MenuController:
 	
 	def _resume(self):
 		self.menu = MenuType.EMPTY
-
-
-	def _initDifficultyMenu(self):
-		self.menu = pygame_menu.Menu(
-			"Select Difficulty",
-			self.width, self.height,
-			theme=themes.THEME_BLUE
-		)
-		self.menu.add.button("Easy", self._setDifficultyEasy)
-		self.menu.add.button("Medium", self._setDifficultyMedium)
-		self.menu.add.button("Hard", self._setDifficultyHard)
-		self.menu.add.button("Back", self._initMainMenu)
-		print(" - Initialized difficulty menu - ")
-
-	
-	def _setDifficultyEasy(self):
-		self.difficulty = Difficulty.EASY
-
-	def _setDifficultyMedium(self):
-		self.difficulty = Difficulty.MEDIUM
-
-	def _setDifficultyHard(self):
-		self.difficulty = Difficulty.HARD
-
-
-
-	def _play(self):
-		print("Play")
-		pygame_menu.events.CLOSE
-		self.menu = MenuType.EMPTY
-		print(self.menu)
-		self.stage = 1
 		self.active = False
 
-	def _terminate(self):
-		pygame.quit()
+
+
+
