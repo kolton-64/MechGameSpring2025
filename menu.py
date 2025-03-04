@@ -29,7 +29,8 @@ class Difficulty(Enum):
 '''
 
 class MenuController: 
-	def __init__(self, pg, screen):
+	def __init__(self, worldState, pg, screen):
+		self.worldState = worldState
 		self.pg = pg
 		self.screen = screen
 		self.width = screen.get_width()
@@ -132,30 +133,32 @@ class MenuController:
 			theme=themes.THEME_BLUE
 		)
 
-		message = f"Difficulty: {self.difficulty.string}"
+		match self.worldState.getDifficulty():
+			case 0:
+				message = "Difficulty: Easy"
+			case 1:
+				message = "Difficulty: Medium"
+			case 2:
+				message = "Difficulty: Hard"
+			case _:
+				print(self.worldState.getDifficulty())
+				message = "Difficulty: Unknown"
+		# message = f"Difficulty: {Difficulty(self.worldState.getDifficulty())}"
 
 		self.menu.add.label(message)
 
 		# needed to declare individual functions to avoid immediate callback
-		self.menu.add.button("Easy", self._setDifficultyEasy)
-		self.menu.add.button("Medium", self._setDifficultyMedium)
-		self.menu.add.button("Hard", self._setDifficultyHard)
+		self.menu.add.button("Easy", self._setDifficulty, Difficulty.EASY.value[0])
+		self.menu.add.button("Medium", self._setDifficulty, Difficulty.MEDIUM.value[0])
+		self.menu.add.button("Hard", self._setDifficulty, Difficulty.HARD.value[0])
 		self.menu.add.button("Back", self._initMainMenu)
 
 		print(" - Initialized difficulty menu - ")
 	
-	def _setDifficultyEasy(self):
-		self.difficulty = Difficulty.EASY
+	def _setDifficulty(self, difficulty):
+		self.worldState.setDifficulty(difficulty)
+		print(" - Difficulty set to: ", self.worldState.getDifficulty())
 		self._initDifficultyMenu()
-
-	def _setDifficultyMedium(self):
-		self.difficulty = Difficulty.MEDIUM
-		self._initDifficultyMenu()
-
-	def _setDifficultyHard(self):
-		self.difficulty = Difficulty.HARD
-		self._initDifficultyMenu()
-
 
 	# In game menus
 
