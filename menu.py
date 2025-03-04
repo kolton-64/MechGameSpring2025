@@ -40,7 +40,6 @@ class MenuController:
 		self.stage: int = 0
 
 		self.menu = MenuType.EMPTY
-		self.active = False
 
 
 		# This is just a placeholder variable
@@ -62,7 +61,7 @@ class MenuController:
 	def menuLoop(self, events):
 
 		# If theres no menu, set up the correct one
-		if self.menu == MenuType.EMPTY and self.active:
+		if self.menu == MenuType.EMPTY and self.worldState.getMenuActive():
 			match self.stage:
 				case 0:
 					self.setMenu(MenuType.MAIN)
@@ -118,7 +117,9 @@ class MenuController:
 		self.stage = 1
 
 		# deactivate menu's
-		self.active = False
+		self.worldState.setMenuActive(False)
+		self.worldState.setGameActive(True)
+
 		print(" - Beginning game - ")
 
 	def _terminate(self):
@@ -175,7 +176,7 @@ class MenuController:
 	
 	def _resume(self):
 		self.menu = MenuType.EMPTY
-		self.active = False
+		self.worldState.setMenuActive(False)
 
 
 
