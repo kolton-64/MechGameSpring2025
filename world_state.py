@@ -4,7 +4,9 @@ class WorldState:
 	def __init__(self):
 		self.difficulty: int = 0
 		self.gameActive: bool = False
-		self.menuActive: bool = False	
+
+		# Menu active is set to true by default because game currently loads to menu
+		self.menuActive: bool = True	
 	
 	# Getters
 	def getDifficulty(self):
