@@ -29,8 +29,8 @@ class Difficulty(Enum):
 '''
 
 class MenuController: 
-	def __init__(self, worldState, pg, screen):
-		self.worldState = worldState
+	def __init__(self, gameState, pg, screen):
+		self.gameState = gameState
 		self.pg = pg
 		self.screen = screen
 		self.width = screen.get_width()
@@ -61,7 +61,7 @@ class MenuController:
 	def menuLoop(self, events):
 
 		# If theres no menu, set up the correct one
-		if self.menu == MenuType.EMPTY and self.worldState.getMenuActive():
+		if self.menu == MenuType.EMPTY and self.gameState.getMenuActive():
 			match self.stage:
 				case 0:
 					self.setMenu(MenuType.MAIN)
@@ -117,8 +117,8 @@ class MenuController:
 		self.stage = 1
 
 		# deactivate menu's
-		self.worldState.setMenuActive(False)
-		self.worldState.setGameActive(True)
+		self.gameState.setMenuActive(False)
+		self.gameState.setGameActive(True)
 
 		print(" - Beginning game - ")
 
@@ -134,7 +134,7 @@ class MenuController:
 			theme=themes.THEME_BLUE
 		)
 
-		match self.worldState.getDifficulty():
+		match self.gameState.getDifficulty():
 			case 0:
 				message = "Difficulty: Easy"
 			case 1:
@@ -142,7 +142,7 @@ class MenuController:
 			case 2:
 				message = "Difficulty: Hard"
 			case _:
-				print(self.worldState.getDifficulty())
+				print(self.gameState.getDifficulty())
 				message = "Difficulty: Unknown"
 		# message = f"Difficulty: {Difficulty(self.worldState.getDifficulty())}"
 
@@ -157,8 +157,8 @@ class MenuController:
 		print(" - Initialized difficulty menu - ")
 	
 	def _setDifficulty(self, difficulty):
-		self.worldState.setDifficulty(difficulty)
-		print(" - Difficulty set to: ", self.worldState.getDifficulty())
+		self.gameState.setDifficulty(difficulty)
+		print(" - Difficulty set to: ", self.gameState.getDifficulty())
 		self._initDifficultyMenu()
 
 	# In game menus
@@ -176,7 +176,7 @@ class MenuController:
 	
 	def _resume(self):
 		self.menu = MenuType.EMPTY
-		self.worldState.setMenuActive(False)
+		self.gameState.setMenuActive(False)
 
 
 
