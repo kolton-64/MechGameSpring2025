@@ -6,7 +6,7 @@ __pycache__/
 *.pyc
 
 #hidden
-._*
+.*
 
 
 # VS code cache
