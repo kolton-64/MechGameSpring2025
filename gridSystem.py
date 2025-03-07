@@ -7,11 +7,17 @@ from constants import SCREEN_WIDTH, SCREEN_HEIGHT, GRID_ROWS, GRID_COLS, WHITE, 
 
 def run_grid_game():
     pg.init()
+    pg.mixer.init()
     clock = pg.time.Clock()
 
     # set up the screen
     screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pg.display.set_caption("Rouge Dreadnaught 2025")
+
+    #load music
+    # music source - https://downloads.khinsider.com/game-soundtracks/album/warhammer-40k-space-marine-ost/08.%2520The%2520Blood%2520Ravens.mp3
+    pg.mixer.music.load("assets/music.mp3") 
+    pg.mixer.music.play(-1) 
 
     background_image = load_background_image('assets/backgroundFight.jpeg', SCREEN_WIDTH, SCREEN_HEIGHT)
 
@@ -41,14 +47,19 @@ def run_grid_game():
         screen.blit(background_image, (0, 0))
 
         # grid and highlight
+        # Inside your main game loop for drawing:
         for row in range(GRID_ROWS):
             for col in range(GRID_COLS):
-                rect = pg.Rect(col * CELL_WIDTH + GRID_X_OFFSET, row * CELL_HEIGHT + GRID_Y_OFFSET, CELL_WIDTH, CELL_HEIGHT)
-                pg.draw.rect(screen, WHITE, rect, 1)  # Grid outline
+                # offset for angeled grid
+                extra_offset = row * (CELL_WIDTH * 0.3)  
+                # shift each row
+                rect = pg.Rect(col * CELL_WIDTH + GRID_X_OFFSET - extra_offset,
+                               row * CELL_HEIGHT + GRID_Y_OFFSET,
+                               CELL_WIDTH, CELL_HEIGHT)
+                pg.draw.rect(screen, WHITE, rect, 1)  # Draw grid outline
 
-                # check if this cell is the player's current position
+                # highlight player's cell if this is the current position.
                 if player_grid.get_player_position() == (row, col):
-                    # fill cell with green mostly
                     pg.draw.rect(screen, GREEN, rect.inflate(-CELL_WIDTH * 0.1, -CELL_HEIGHT * 0.1))
 
         # event handling
@@ -65,22 +76,26 @@ def run_grid_game():
 
             elif event.type == pg.MOUSEBUTTONDOWN:
                 mouse_x, mouse_y = pg.mouse.get_pos()
-                # adjust so the grid is lower
-                if (mouse_x >= GRID_X_OFFSET and 
-                    mouse_x < GRID_X_OFFSET + CELL_WIDTH * GRID_COLS and 
-                    mouse_y >= GRID_Y_OFFSET and 
+                # check the click is within the grid
+                if (mouse_y >= GRID_Y_OFFSET and 
                     mouse_y < GRID_Y_OFFSET + CELL_HEIGHT * GRID_ROWS):
-                    clicked_col = int((mouse_x - GRID_X_OFFSET) // CELL_WIDTH)
+                    
                     clicked_row = int((mouse_y - GRID_Y_OFFSET) // CELL_HEIGHT)
+                    # adjust with offset
+                    adjusted_mouse_x = mouse_x - GRID_X_OFFSET + (clicked_row * (CELL_WIDTH * 0.3))
+                    
+                    if adjusted_mouse_x >= 0 and adjusted_mouse_x < CELL_WIDTH * GRID_COLS:
+                        clicked_col = int(adjusted_mouse_x // CELL_WIDTH)
+                        
+                        # get position
+                        player_row, player_col = player_grid.get_player_position()
 
-                    # get current position
-                    player_row, player_col = player_grid.get_player_position()
+                        # allow if adjacent or diagonal
+                        if (abs(clicked_row - player_row) <= 1 and 
+                            abs(clicked_col - player_col) <= 1 and 
+                            not (clicked_row == player_row and clicked_col == player_col)):
+                            player_grid.place_player((clicked_row, clicked_col))
 
-                    # click movement
-                    if (abs(clicked_row - player_row) <= 1 and 
-                        abs(clicked_col - player_col) <= 1 and 
-                        not (clicked_row == player_row and clicked_col == player_col)):
-                        player_grid.place_player((clicked_row, clicked_col))
 
         pg.display.flip()
         clock.tick(60)
