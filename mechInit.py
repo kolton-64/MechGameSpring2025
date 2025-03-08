@@ -2,33 +2,28 @@
 #for a game.
 #################################80CHAR#########################################
 import random
-import dreadnought
-import playerGrid
-import weapons
-import enemyai
+from dreadnought import Dreadnought
+from playerGrid import PlayerGrid
+from weapons import Weapon
+from weapons import Bolter
+from weapons import MeleeWeapon1
+from weapons import AOEWeapon1
+from weapons import AssaultCannon
+from enemyai import BadMech
+from enemyai import DecisionMaker
 
 
 class MechInit:
-	#initializes an object which will hold all of the mech's along
-	#with any additional information
-	playerMech
-	playerPosition
-	enemyMech
-	enemyPosition
-	currentEnemy
-	currentStage
 	def __init__(self):
 		#construct player mech default 2 bolters
-		self.playerMech = new Dreadnought(
-			"template", 1, new Bolter(), new Bolter()
-			)
-		self.playerPosition = new playerGrid()
+		self.playerMech = Dreadnought("template", 1, Bolter(), Bolter())
+		self.playerPosition = PlayerGrid()
 		#construct 9 enemy mech's with a random combo of weapons
 		self.enemyMech = []
 		self.enemyPosition = []
 		for i in range(9):
 			self.enemyMech.append(
-				new BadMech(10, self.Random_Weapon(), self.Random_Weapon())
+				BadMech(10, self.Random_Weapon(), self.Random_Weapon())
 				)
 			if 0 <= i <= 2:
 				self.enemyMech[i].Set_Level(1)
@@ -36,7 +31,7 @@ class MechInit:
 				self.enemyMech[i].Set_Level(2)
 			if 6 <= i <= 8:
 				self.enemyMech[i].Set_Level(3)
-			self.enemyPosition.append(new playerGrid())
+			self.enemyPosition.append(PlayerGrid())
 		#construct variable to keep track of current enemy
 		self.currentEnemy = 0
 		#construct variable to keep track of current stage
@@ -46,13 +41,13 @@ class MechInit:
 	def Random_Weapon(self):
 		choice = random.randint(1, 4)
 		if choice == 1:
-			return new Bolter()
+			return Bolter()
 		elif choice == 2:
-			return new MeleeWeapon1()
+			return MeleeWeapon1()
 		elif choice == 3:
-			return new AOEWeapon1()
+			return AOEWeapon1()
 		else:
-			return new AssaultCannon()
+			return AssaultCannon()
 	def Set_Difficulty(self, difficulty):
 		for i in range(9):
 			if 0 <= i <= 2:
