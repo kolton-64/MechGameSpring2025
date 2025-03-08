@@ -9,37 +9,39 @@
 #
 
 class Weapon:
-	# weaponRange rename?
-	# add ammoCapacity for weapons requiring ammunition?
-	def __init__(self, name, damage, weaponRange):
+	# add ammoCapacity for weapons requiring ammunition ?
+	# add weaponPairSpecialAttack ?
+
+	def __init__(self, name, damage): #weaponRange
 		self.name = name
 		self.damage = damage
-		self.weaponRange = [] # name attackZone?
+		# self.weaponRange = [] # ! change to self.weaponRange = weaponRange ? (name attackZone?)
 
-	def getWeaponRange(self):
-		return self.weaponRange
+	#def getWeaponRange(self):
+	#	return self.weaponRange
 
-	# weapon attack logic? or will that be in combat/player/ect file?
-	def weaponAttack(self, occupantPosition, targetDreadnought):
-		# temporary basic weapon attack logic, text (always hits static zone) 
-		if occupantPosition in self.weaponRange:
-			# Hit = character damage == weaponDamage
+	def getWeaponAttackZoneOptions(self): # for dynamic weaponRange/AttackZone selection
+		return []
+
+	def weaponAttack(self, selectedAttackZone, occupantPosition, targetDreadnought):
+		# temporary basic weapon attack logic, text (Weapons always hits their static zone) 
+		if occupantPosition in selectedAttackZone:
 			print(f"{self.name} hit at tile: {occupantPosition} for {self.damage} damage.")
-		else:
-			# Miss = no character damage
+			if targetDreadnought: # if dreadnought in attackZone -> Hit -> character damage == weaponDamage
+				targetDreadnought.takeDamage(self.damage)
+		else: # Miss = no character damage
 			print(f"{self.name} missed at tile: {occupantPosition}.")
-
-	def displayWeaponStats(self):
-		# FR#22 When weapon is selected and indicator will present the stats and attack pattern
+			
+	def displayWeaponStats(self): # for UI
 		# will need to visually indicate, but for now just print
 		print(f"Selected Weapon: {self.name}")
 		print(f"Weapon Damage: {self.damage}")
-		self.displayWeaponAttackGrid # needs integration with pygame / visuals
+		self.displayWeaponAttackGrid() # needs integration with pygame / visuals
 
-	def displayWeaponAttackGrid(self):
+	def displayWeaponAttackGrid(self): # utlized by displayWeaponStats
 		# shows grid representation of weapon attack zone(1's = hit zone)
 		print(f"{self.name}: Attack Pattern:")
-		for row in range(3):
+		for row in range(3): # make dynamic?
 			rowRepr = []
 			for col in range(3):
 				if (row, col) in self.weaponRange:
@@ -57,8 +59,15 @@ class Bolter(Weapon):
 		super().__init__(
 			name = "Bolter", #placeholder
 			damage = 2, # temp
-			weaponRange = [(1, 0), (1, 1), (1, 2)], # middle row for now
+			# weaponRange = [(1, 0), (1, 1), (1, 2)], # middle row for now
 			)
+
+	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
+		# Bolter has straight line attackPattern (1 row)
+		row0 = {(0, 0), (0, 1), (0, 2)}
+		row1 = {(1, 0), (1, 1), (1, 2)}
+		row2 = {(2, 0), (2, 1), (2, 2)}
+		return [row0, row1, row2]
 
 class MeleeWeapon1(Weapon):
 # weapon #2: MeleeWeapon1(placeholder, Powerfist, Chainfist, Chain-axe/sword, etc..): high dmg, Single tile attack?
@@ -66,23 +75,42 @@ class MeleeWeapon1(Weapon):
 	def __init__(self):
 		super().__init__(
 			name = "MeleeWeapon1", #placeholder
-			damage = 3, # temp
-			weaponRange = [(0, 0), (1, 0), (2, 0)], # single? (first column for now)
+			damage = 2, # temp
+			# weaponRange = [(0, 0), (1, 0), (2, 0)], # single? (first column for now)
 			)
 
-class AOEWeapon1(Weapon):
-# weapon #3: AOEWeapon1(placeholder, Flamer, Assault-Cannon, etc.: , base dmg?, Multi-tile pattern attack(AOE).
+	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
+		# MeleeWeapon1 has straight column attackPattern (1 columnn) (eventually limit to only front column?)
+		# - for now can hit any 1 column
+		col0 = {(0, 0), (1, 0), (2, 0)}
+		col1 = {(0, 1), (1, 1), (2, 1)}
+		col2 = {(0, 2), (1, 2), (2, 2)}
+		return [col0, col1, col2]
+
+class AOEWeapon1(Weapon): # will rename to either KrakMissileLauncher or FragMissileLauncher, then add the latter.
+# weapon#3: name: AOEWeapon1, dmg: temp, attackZone: AOE/Concentrated explosion,
 
 	def __init__(self):
 		super().__init__(
 			name = "AOEWeapon1",
-			damage = 1, # temp
-			weaponRange = [ # back 2 columns for now
-				(0, 1), (0, 2),
-				(1, 1), (1, 2),
-				(2, 1), (2, 2)
-			], 
+			damage = 2, # temp
+			# weaponRange = [ # back 2 columns for now
+			# 	(0, 1), (0, 2),
+			# 	(1, 1), (1, 2),
+			# 	(2, 1), (2, 2)
+			# ], 
 			)
+
+	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
+		# MissileLauncher for now hits a 2x2 'square' selection of tiles on the grid
+		topLeftCornerCoordinates = [(0, 0), (0, 1), (1, 0), (1, 1)]
+		attackZoneOptions = []
+		for (row, column) in topLeftCornerCoordinates:
+			attackZone = {
+				(row, column), (row, column + 1), (row + 1, column), (row + 1, column + 1)
+			}
+			attackZoneOptions.append(attackZone)
+		return attackZoneOptions
 
 class AssaultCannon(Weapon):
 # weapon #4: AOEWeapon2(placeholder, Flamer, Assault-Cannon, etc.: , base dmg?, Multi-tile pattern attack(AOE).
@@ -91,10 +119,19 @@ class AssaultCannon(Weapon):
 		super().__init__(
 			name = "AssaultCannon",
 			damage = 2, # temp
-			weaponRange = [ # every other tile hit. (scatter)
-				(0, 0), (0, 2),
-				(1, 1),
-				(2, 0), (2, 2)
-			], 
+			# weaponRange = [ # every other tile hit. (scatter) for now.
+			# 	(0, 0), (0, 2),
+			# 	(1, 1),
+			# 	(2, 0), (2, 2)
+			# ], 
 			)
 
+	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
+		# AssaultCannon for now hits any two tiles (adjacent) in the same column. (choosing from pairs of vertically adjacent tiles)
+		attackZoneOptions = []
+		for col in range(3):
+			attackZone1 = {(0, col), (1, col)}
+			attackZone2 = {(1, col), (2, col)}
+			attackZoneOptions.append(attackZone1)
+			attackZoneOptions.append(attackZone2)
+		return attackZoneOptions
