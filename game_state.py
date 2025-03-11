@@ -3,6 +3,7 @@
 class GameState: 
 	def __init__(self):
 		self.difficulty: int = 0
+		self.musicActive: bool = True
 		self.gameActive: bool = False
 
 		# Menu active is set to true by default because game currently loads to menu
@@ -11,6 +12,10 @@ class GameState:
 	# Getters
 	def getDifficulty(self):
 		return self.difficulty
+
+	def getMusicActive(self):
+		return self.musicActive
+
 
 	def getGameActive(self):
 		return self.gameActive
@@ -21,6 +26,9 @@ class GameState:
 	# Setters
 	def setDifficulty(self, diff: int):
 		self.difficulty = diff
+	
+	def setMusicActive(self, active: bool):
+		self.musicActive = active
 	
 	def setGameActive(self, active: bool):
 		self.gameActive = active
