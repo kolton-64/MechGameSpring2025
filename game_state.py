@@ -1,3 +1,4 @@
+import enum
 
 # World state keeps track of global game state
 class GameState: 
@@ -36,4 +37,21 @@ class GameState:
 	def setMenuActive(self, state: bool):
 		self.menuActive = state
 
-	
+
+
+
+	def currentState(self):
+		state = None
+		if(self.menuActive and self.gameActive == False):
+			state = GameState.MAIN_MENU
+		elif(self.menuActive == False and self.gameActive):
+			state = GameState.IN_GAME
+		else:
+			state = GameState.PAUSED
+
+
+
+class GameState(Enum):
+	MAIN_MENU = 0
+	IN_GAME = 1
+	PAUSED = 2 
