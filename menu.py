@@ -3,6 +3,8 @@ import pygame
 import pygame_menu
 from pygame_menu import themes
 from enum import Enum
+import time
+import unittest
 
 class MenuType(Enum):
 	EMPTY = 0
@@ -40,6 +42,8 @@ class MenuController:
 		self.stage: int = 0
 
 		self.menu = MenuType.EMPTY
+		self.currentMenu = MenuType.EMPTY
+		self.mainTheme = themes.THEME_BLUE
 
 
 		# This is just a placeholder variable
@@ -77,8 +81,10 @@ class MenuController:
 		print("Set menu")
 		match menuType:
 			case MenuType.MAIN:
+				self.currentMenu = MenuType.MAIN
 				self._initMainMenu()
 			case MenuType.IN_GAME:
+				self.currentMenu = MenuType.IN_GAME
 				self._initInGameMenu()
 
 	def drawMenu(self, events):
@@ -98,7 +104,7 @@ class MenuController:
 		self.menu = pygame_menu.Menu(
 			"Rogue Dreadnaught",
 			self.width, self.height,
-			theme=themes.THEME_BLUE
+			theme=self.mainTheme
 		)
 
 		# define buttons and onclick functions
@@ -110,8 +116,10 @@ class MenuController:
 
 	# Start the game
 	def _play(self):
+
 		# discard the current menu 
 		self.menu = MenuType.EMPTY
+		self.currentMenu = MenuType.EMPTY
 
 		# set the menu stage to the in game menu index 1
 		self.stage = 1
@@ -162,7 +170,6 @@ class MenuController:
 		self._initDifficultyMenu()
 
 	# In game menus
-
 	def _initInGameMenu(self):
 		self.menu = pygame_menu.Menu(
 			"Game Paused",
@@ -174,10 +181,95 @@ class MenuController:
 		self.menu.add.button('Quit', self._initMainMenu)
 		print(" - Initialized in game menu - ")
 	
+	def _setAudioPreference(self, active: bool, volume: int):
+		self.gameState.setMusicActive(active)
+
+	def _fadeMenu(self, timeout):
+		self.mainTheme.set_background_color_opacity = 0.5
+
+
+	
 	def _resume(self):
-		self.menu = MenuType.EMPTY
-		self.gameState.setMenuActive(False)
+		self._fadeMenu(100)
+		# self.menu = MenuType.EMPTY
+		# self.gameState.setMenuActive(False)
 
 
+class TestMenuController(unittest.TestCase):
+	import game_state
+	def setUp(self):
+		self.GS = self.game_state.GameState()
+		self.pg = pygame
+		self.screen = pygame.display.set_mode((1280,720), pygame.NOFRAME)
+		self.MC = MenuController(self.GS, self.pg, self.screen)
+	
+	'''
+		Integration test
+
+			- 2 units: 
+				1) (function) MenuController._play() 
+				2) (class) game_state 
+	'''
+	def test_state_update(self):
+
+		# Starting the program will bring the player straight to the main menu
+
+		# game_state: Game should not be active 
+		self.assertFalse(self.GS.getGameActive())
+
+		# game_state: menu should be active 
+		self.assertTrue(self.GS.getMenuActive())
+
+		# MenuController._play() will start the game
+		self.MC._play()
+
+		# game_state: game should now be active
+		self.assertTrue(self.GS.getGameActive())
+
+		# game_state: menus should be inactive
+		self.assertFalse(self.GS.getMenuActive())
+
+	'''
+		Black box test.  Testing Functional Requirement #34
+		     - for this requirement I need a function that determines how much
+			 the HUD will scale by, depending on the amount of damage taken
+			 
+			 1) 1 - 5 damage, HUD will scale by .1
+			 2) 6 - 10 damage, HUD will scale by .2
+			 3) 11+ damage, HUD will scale by .3
+
+			unit will be a function called hud_scale(damage: int)
+			I will use the test to write the function.
+	'''
+	def test_hud_scale(self):
+		scaleFactor = hud_scale(-1)
+		self.assertEqual(scaleFactor, 0)
+
+		scaleFactor = hud_scale(0)
+		self.assertEqual(scaleFactor, 0)
+
+		scaleFactor = hud_scale(1)
+		self.assertEqual(scaleFactor, .1)
+
+		scaleFactor = hud_scale(5)
+		self.assertEqual(scaleFactor, .1)
+
+		scaleFactor = hud_scale(6)
+		self.assertEqual(scaleFactor, .2)
+
+		scaleFactor = hud_scale(10)
+		self.assertEqual(scaleFactor, .2)
+		
+		scaleFactor = hud_scale(11)
+		self.assertEqual(scaleFactor, .3)
 
 
+def hud_scale(damage: int):
+	scale: float = 0 
+	if(damage > 0 and damage <= 5):
+		scale = .1
+	if(damage >= 6 and damage <= 10):
+		scale = .2
+	if(damage > 10):
+		scale = .3
+	return scale
