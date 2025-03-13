@@ -5,6 +5,7 @@ from pygame_menu import themes
 from enum import Enum
 import time
 import unittest
+from game_state import Difficulty
 
 class MenuType(Enum):
 	EMPTY = 0
@@ -12,14 +13,7 @@ class MenuType(Enum):
 	DIFFICULTY = 2
 	IN_GAME = 3
 
-class Difficulty(Enum):
-	EASY = (0, "Easy")
-	MEDIUM = (1, "Medium")
-	HARD = (2, "Hard")
 
-	def __init__(self, int, string):
-		self.int = int
-		self.string = string
 
 '''
 	Menu Controller
@@ -157,14 +151,14 @@ class MenuController:
 		self.menu.add.label(message)
 
 		# needed to declare individual functions to avoid immediate callback
-		self.menu.add.button("Easy", self._setDifficulty, Difficulty.EASY.value[0])
-		self.menu.add.button("Medium", self._setDifficulty, Difficulty.MEDIUM.value[0])
-		self.menu.add.button("Hard", self._setDifficulty, Difficulty.HARD.value[0])
+		self.menu.add.button("Easy", self._setDifficulty, Difficulty.EASY)
+		self.menu.add.button("Medium", self._setDifficulty, Difficulty.MEDIUM)
+		self.menu.add.button("Hard", self._setDifficulty, Difficulty.HARD)
 		self.menu.add.button("Back", self._initMainMenu)
 
 		print(" - Initialized difficulty menu - ")
 	
-	def _setDifficulty(self, difficulty):
+	def _setDifficulty(self, difficulty: Difficulty):
 		self.gameState.setDifficulty(difficulty)
 		print(" - Difficulty set to: ", self.gameState.getDifficulty())
 		self._initDifficultyMenu()
@@ -207,12 +201,11 @@ class TestMenuController(unittest.TestCase):
 		Integration test
 
 			- 2 units: 
-				1) (function) MenuController._play() 
+				1) (class) MenuController 
 				2) (class) game_state 
 	'''
-	def test_state_update(self):
-
-		# Starting the program will bring the player straight to the main menu
+	def test_integration_game_state_menu(self):
+		self.pg.init()
 
 		# game_state: Game should not be active 
 		self.assertFalse(self.GS.getGameActive())
@@ -220,7 +213,37 @@ class TestMenuController(unittest.TestCase):
 		# game_state: menu should be active 
 		self.assertTrue(self.GS.getMenuActive())
 
-		# MenuController._play() will start the game
+		# Setting difficulty in Menu Controller should update game state
+		# game_state: should only accept Difficulty enum types but can return the int value or the string value of the difficulty
+		self.MC._setDifficulty(-1)
+		self.assertEqual(self.GS.getDifficulty(), 0)
+
+		self.MC._setDifficulty(Difficulty.EASY)
+		self.assertEqual(self.GS.getDifficulty(), 0)
+		self.assertEqual(self.GS.getDifficultyName(), "Easy")
+
+		self.MC._setDifficulty(Difficulty.MEDIUM)
+		self.assertEqual(self.GS.getDifficulty(), 1)
+		self.assertEqual(self.GS.getDifficultyName(), "Medium")
+
+		self.MC._setDifficulty(Difficulty.HARD)
+		self.assertEqual(self.GS.getDifficulty(), 2)
+		self.assertEqual(self.GS.getDifficultyName(), "Hard")
+
+		self.MC._setDifficulty(3)
+
+		# game_state: difficulty should not change from last value as 3 is out of range
+		self.assertEqual(self.GS.getDifficulty(), 2)
+
+		self.MC._setDifficulty("HARD")
+
+		# getDifficulty should still return 2 for hard as it has still not been mutated.
+		# setDifficulty only accepts Difficulty enum types
+		self.assertEqual(self.GS.getDifficulty(), 2)
+
+
+
+		# Now start the game from menu controller
 		self.MC._play()
 
 		# game_state: game should now be active
@@ -228,6 +251,7 @@ class TestMenuController(unittest.TestCase):
 
 		# game_state: menus should be inactive
 		self.assertFalse(self.GS.getMenuActive())
+	
 
 	'''
 		Black box test.  Testing Functional Requirement #34

@@ -4,7 +4,7 @@ import unittest
 # World state keeps track of global game state
 class GameState: 
 	def __init__(self):
-		self.difficulty: int = 0
+		self.difficulty: Difficulty = Difficulty.EASY
 		self.musicActive: bool = True
 		self.gameActive: bool = False
 
@@ -13,7 +13,11 @@ class GameState:
 	
 	# Getters
 	def getDifficulty(self):
-		return self.difficulty
+		return self.difficulty.value[0]
+
+	def getDifficultyName(self):
+		return self.difficulty.value[1]
+	
 
 	def getMusicActive(self):
 		return self.musicActive
@@ -26,8 +30,11 @@ class GameState:
 		return self.menuActive
 
 	# Setters
-	def setDifficulty(self, diff: int):
-		self.difficulty = diff
+	def setDifficulty(self, diff):
+		if(type(diff) == Difficulty):
+			self.difficulty = diff
+
+		
 	
 	def setMusicActive(self, active: bool):
 		self.musicActive = active
@@ -98,7 +105,14 @@ class GameStateTest(unittest.TestCase):
 
 
 
+class Difficulty(Enum):
+	EASY = (0, "Easy")
+	MEDIUM = (1, "Medium")
+	HARD = (2, "Hard")
 
+	def __init__(self, int, string):
+		self.int = int
+		self.string = string
 
 class State(Enum):
 	MAIN_MENU = 0
