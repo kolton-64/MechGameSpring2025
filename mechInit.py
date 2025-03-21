@@ -16,7 +16,7 @@ from enemyai import DecisionMaker
 class MechInit:
 	def __init__(self):
 		#construct player mech default 2 bolters
-		self.playerMech = Dreadnought("template", 1, Bolter(), Bolter())
+		self.playerMech = Dreadnought("template", 10, Bolter(), Bolter())
 		self.playerPosition = PlayerGrid()
 		#construct 9 enemy mech's with a random combo of weapons
 		self.enemyMech = []
@@ -67,3 +67,9 @@ class MechInit:
 		else:
 			self.currentStage = 3
 			self.current_enemy = choice + 5
+	def Get_Enemy_Position(self):
+		return self.enemyPosition[self.currentEnemy].player_position
+	def Set_Enemy_Position(self, spot):
+		self.enemyPosition[self.currentEnemy].player_position = spot
+	def Get_Current_Enemy(self):
+		return self.currentEnemy
