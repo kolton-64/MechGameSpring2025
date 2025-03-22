@@ -6,7 +6,7 @@
 # from weapons import Bolter, MeleeWeapon1, AOEWeapon1
 # or 
 # from weapons import Weapon
-#
+# (recommitted with PR... WP#7)
 
 class Weapon:
 	# add ammoCapacity for weapons requiring ammunition ?
