@@ -13,18 +13,18 @@ class Weapon:
 	# add weaponPairSpecialAttack ?
 
 	def __init__(self, name, damage): #weaponRange
-		self.name = name
-		self.damage = damage
-		# self.weaponRange = [] # ! change to self.weaponRange = weaponRange ? (name attackZone?)
+		self.name = name # str - weapon's name
+		self.damage = damage # int - weapon's damage
 
-	#def getWeaponRange(self):
-	#	return self.weaponRange
-
-	def getWeaponAttackZoneOptions(self): # for dynamic weaponRange/AttackZone selection
+	def getWeaponAttackZoneOptions(self): # (subclasses override) ~ for dynamic weaponRange/AttackZone selection
 		return []
 
 	def weaponAttack(self, selectedAttackZone, occupantPosition, targetDreadnought):
-		# temporary basic weapon attack logic, text (Weapons always hits their static zone) 
+		# temporary basic weapon attack logic, text
+		# attempts hit occupantPosition if it is within the selected attack zone.
+		# if so, the weapon deals its damage to the targetDreadnought in the occupantPosition (subtract hp)
+		# otherwise, the attack is a miss (print for now)
+
 		if occupantPosition in selectedAttackZone:
 			print(f"{self.name} hit at tile: {occupantPosition} for {self.damage} damage.")
 			if targetDreadnought: # if dreadnought in attackZone -> Hit -> character damage == weaponDamage
@@ -59,7 +59,6 @@ class Bolter(Weapon):
 		super().__init__(
 			name = "Bolter", #placeholder
 			damage = 2, # temp
-			# weaponRange = [(1, 0), (1, 1), (1, 2)], # middle row for now
 			)
 
 	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
@@ -76,7 +75,6 @@ class MeleeWeapon1(Weapon):
 		super().__init__(
 			name = "MeleeWeapon1", #placeholder
 			damage = 2, # temp
-			# weaponRange = [(0, 0), (1, 0), (2, 0)], # single? (first column for now)
 			)
 
 	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
@@ -94,11 +92,6 @@ class AOEWeapon1(Weapon): # will rename to either KrakMissileLauncher or FragMis
 		super().__init__(
 			name = "AOEWeapon1",
 			damage = 2, # temp
-			# weaponRange = [ # back 2 columns for now
-			# 	(0, 1), (0, 2),
-			# 	(1, 1), (1, 2),
-			# 	(2, 1), (2, 2)
-			# ], 
 			)
 
 	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
@@ -118,12 +111,7 @@ class AssaultCannon(Weapon):
 	def __init__(self):
 		super().__init__(
 			name = "AssaultCannon",
-			damage = 2, # temp
-			# weaponRange = [ # every other tile hit. (scatter) for now.
-			# 	(0, 0), (0, 2),
-			# 	(1, 1),
-			# 	(2, 0), (2, 2)
-			# ], 
+			damage = 2, # temp 
 			)
 
 	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
