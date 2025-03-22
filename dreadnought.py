@@ -2,6 +2,7 @@
 # will handle basic logic and functionality for the dreadnought(player)
 # # (utlized heavily by enemy ai)
 # will rely on other classes/files: (weapon.py)
+# added unit-testing, commited and merged before making PR for WP#7, oops! (recommited with PR)
 
 
 from weapons import Weapon
