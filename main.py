@@ -71,6 +71,10 @@ def run_grid_game():
         pg.K_RIGHT: "right"
     }
 
+    # load the mech image
+    player_image = pg.image.load('assets/placeholder_mech_image.jpeg')
+    player_image = pg.transform.scale(player_image, (int(CELL_WIDTH * 1.5), int(CELL_HEIGHT * 1.5)))
+
     running = True
     while running:
         # background
@@ -104,6 +108,17 @@ def run_grid_game():
                         pg.draw.rect(screen, RED, rect.inflate(-CELL_WIDTH * 0.1, -CELL_HEIGHT * 0.1))
                     else:
                         pg.draw.rect(screen, GREEN, rect.inflate(-CELL_WIDTH * 0.1, -CELL_HEIGHT * 0.1))
+
+        # positioning for the mech image, offset slightly to appear standing on the square
+        player_row, player_col = player_grid.get_player_position()
+        extra_offset = player_row * (CELL_WIDTH * 0.3)
+        cell_x = player_col * CELL_WIDTH + GRID_X_OFFSET - extra_offset
+        cell_y = player_row * CELL_HEIGHT + GRID_Y_OFFSET
+        img_width, img_height = player_image.get_size()
+        image_x = cell_x + (CELL_WIDTH - img_width) // 2
+        image_y = cell_y + (CELL_HEIGHT - img_height) // 2 - 50
+        screen.blit(player_image, (image_x, image_y))
+        
 
         # grid and highlight for the enemy
         for row in range(GRID_ROWS):
@@ -141,17 +156,12 @@ def run_grid_game():
                 # check the click is within the grid
                 if (mouse_y >= GRID_Y_OFFSET and 
                     mouse_y < GRID_Y_OFFSET + CELL_HEIGHT * GRID_ROWS):
-                    
                     clicked_row = int((mouse_y - GRID_Y_OFFSET) // CELL_HEIGHT)
-                    # adjust with offset
                     adjusted_mouse_x = mouse_x - GRID_X_OFFSET + (clicked_row * (CELL_WIDTH * 0.3))
-                    
                     if adjusted_mouse_x >= 0 and adjusted_mouse_x < CELL_WIDTH * GRID_COLS:
                         clicked_col = int(adjusted_mouse_x // CELL_WIDTH)
-                        
                         # get position
                         player_row, player_col = player_grid.get_player_position()
-
                         # allow if adjacent or diagonal
                         if (abs(clicked_row - player_row) <= 1 and 
                             abs(clicked_col - player_col) <= 1 and 
