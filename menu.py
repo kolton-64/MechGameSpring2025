@@ -39,6 +39,8 @@ class MenuController:
 		self.currentMenu = MenuType.EMPTY
 		self.mainTheme = themes.THEME_BLUE
 
+		self.j = 0
+
 
 		# This is just a placeholder variable
 		# difficulty will be tracked in a state machine
@@ -58,17 +60,23 @@ class MenuController:
 	'''
 	def menuLoop(self, events):
 
-		# If theres no menu, set up the correct one
+
+		print("Menu Loop")
+
+		print("TESTING")
+		print(self.gameState.currentState())
+
 		if self.menu == MenuType.EMPTY and self.gameState.getMenuActive():
 			match self.stage:
 				case 0:
 					self.setMenu(MenuType.MAIN)
 				case 1:
 					self.setMenu(MenuType.IN_GAME)
-
-		# Only draw the menu if the menu has been properly set
-		if self.menu != MenuType.EMPTY:
-			self.drawMenu(events)
+		
+		if self.gameState.currentState().value == 1 and self.gameState.getMenuActive():
+			if(self.gameState.getMenuActive()): #james smells like cheese -Oscar
+				self.setMenu(MenuType.IN_GAME)
+			self._initInGameMenu()
 
 
 	def setMenu(self, menuType):
@@ -84,13 +92,15 @@ class MenuController:
 	def drawMenu(self, events):
 		self.menu.update(events)
 		if(type(self.menu) == pygame_menu.menu.Menu):
-			self.menu.draw(self.screen)
+			self.menu.mainloop(self.screen)
 
 
 	# Landing page menus
 
 	# Main menu where player can change difficult, enter game, or exit
 	def _initMainMenu(self):
+		if(self.menu != MenuType.EMPTY):
+			self.menu.disable()
 		# indicate main menu stage
 		self.stage = 0  
 
@@ -106,10 +116,13 @@ class MenuController:
 		self.menu.add.button("Change Difficulty", self._initDifficultyMenu)
 		self.menu.add.button("Exit", self._terminate)
 
+		self.menu.mainloop(self.screen)
+
 		print(" - Initialized main menu - ")
 
 	# Start the game
 	def _play(self):
+		self.menu.disable()
 
 		# discard the current menu 
 		self.menu = MenuType.EMPTY
@@ -122,7 +135,11 @@ class MenuController:
 		self.gameState.setMenuActive(False)
 		self.gameState.setGameActive(True)
 
+
+		print(self.gameState.currentState())
+
 		print(" - Beginning game - ")
+		pygame_menu.events.EXIT
 
 	def _terminate(self):
 		self.pg.quit()
@@ -130,6 +147,8 @@ class MenuController:
 		sys.exit()
 
 	def _initDifficultyMenu(self):
+		if(self.menu != MenuType.EMPTY):
+			self.menu.disable()
 		self.menu = pygame_menu.Menu(
 			"Select Difficulty",
 			self.width, self.height,
@@ -156,6 +175,7 @@ class MenuController:
 		self.menu.add.button("Hard", self._setDifficulty, Difficulty.HARD)
 		self.menu.add.button("Back", self._initMainMenu)
 
+		self.menu.mainloop(self.screen)
 		print(" - Initialized difficulty menu - ")
 	
 	def _setDifficulty(self, difficulty: Difficulty):
@@ -165,6 +185,9 @@ class MenuController:
 
 	# In game menus
 	def _initInGameMenu(self):
+		print(" - Initializing in game menu - ")
+		if(self.menu != MenuType.EMPTY):
+			self.menu.disable()
 		self.menu = pygame_menu.Menu(
 			"Game Paused",
 			self.width / 2, self.height / 2,
@@ -173,20 +196,19 @@ class MenuController:
 
 		self.menu.add.button('Resume', self._resume)
 		self.menu.add.button('Quit', self._initMainMenu)
+		self.menu.mainloop(self.screen)
 		print(" - Initialized in game menu - ")
 	
 	def _setAudioPreference(self, active: bool, volume: int):
 		self.gameState.setMusicActive(active)
 
-	def _fadeMenu(self, timeout):
-		self.mainTheme.set_background_color_opacity = 0.5
 
 
 	
 	def _resume(self):
-		self._fadeMenu(100)
-		# self.menu = MenuType.EMPTY
-		# self.gameState.setMenuActive(False)
+		self.menu.disable()
+		self.menu = MenuType.EMPTY
+		self.gameState.setMenuActive(False)
 
 
 class TestMenuController(unittest.TestCase):
