@@ -16,14 +16,14 @@ from enemyai import DecisionMaker
 class MechInit:
 	def __init__(self):
 		#construct player mech default 2 bolters
-		self.playerMech = Dreadnought("template", 10, Bolter(), Bolter())
+		self.playerMech = Dreadnought("template", 50, Bolter(), Bolter())
 		self.playerPosition = PlayerGrid()
 		#construct 9 enemy mech's with a random combo of weapons
 		self.enemyMech = []
 		self.enemyPosition = []
 		for i in range(9):
 			self.enemyMech.append(
-				BadMech(10, self.Random_Weapon(), self.Random_Weapon())
+				BadMech(self.Random_Weapon(), self.Random_Weapon())
 				)
 			if 0 <= i <= 2:
 				self.enemyMech[i].Set_Level(1)
