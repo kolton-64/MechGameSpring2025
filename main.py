@@ -91,6 +91,9 @@ def run_grid_game():
             # We can reinitialize the appropriate variables here, so that the game can be restarted
 
             menuController.menuLoop(pg.event.get())
+
+            #update mechs with current difficulty
+            enemy_ai.Update_Difficulty(gameState.getDifficulty())
         else:
             # background
             screen.blit(background_image, (0, 0))
@@ -99,7 +102,7 @@ def run_grid_game():
             if enemy_logging:
                 for i in range(9):
                     combat_log[i] = combat_font.render(combat_log_text[i], 1, WHITE)
-                    screen.blit(combat_log[i], (SCREEN_WIDTH-180,(SCREEN_HEIGHT/2)-11*i))
+                    screen.blit(combat_log[i], (SCREEN_WIDTH-210,(SCREEN_HEIGHT/2)-11*i))
 
             #color timer for damage animation
             if damage_timer:
@@ -195,17 +198,17 @@ def run_grid_game():
 
             #enemyai takes enemies turn
             if enemies_turn:
-                action = enemy_ai.Take_Action()
+                first_a = enemy_ai.Take_Action()
+                second_a = enemy_ai.Take_Action()
                 turn_counter += 1
                 for i in range(9):
                     combat_log_text[9-i] = combat_log_text[8-i]
-                if action == 1:
-                    combat_log_text[0] = "Action "+str(turn_counter)+": The enemy is defending"
-                elif action == 2:
-                    combat_log_text[0] = "Action "+str(turn_counter)+": The enemy made a move"
-                else:
-                    combat_log_text[0] = "Action "+str(turn_counter)+": The enemy has attacked"
+                combat_log_text[0], enemy_actions = enemyai.combat_log_text(first_a,
+                                                             second_a, turn_counter)
+                if first_a or second_a == 3:
                     damage_timer = 20
+                print(enemy_actions)
+
                 enemies_turn = 0
                 if games_mechs.playerMech.healthPoints <= 0:
                     you_died_text = you_died_font.render('You have died!', 1, RED)

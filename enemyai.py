@@ -11,11 +11,51 @@ from weapons import MeleeWeapon1
 from weapons import AOEWeapon1
 from weapons import AssaultCannon
 
+def combat_log_text(first_a, second_a, turn_counter):
+    move = 0
+    buff = 0
+    attack = 0
+    log_text = ""
+    if first_a == 1:
+        buff += 1
+        if second_a == 1:
+            buff += 1
+            log_text = "Action "+str(turn_counter)+": The enemy defended greatly."
+        elif second_a == 2:
+            move += 1
+            log_text = "Action "+str(turn_counter)+": The enemy defended and moved."
+        else:
+            attack += 1
+            log_text = "Action "+str(turn_counter)+": The enemy defended and attacked."
+    elif first_a == 2:
+        move += 1
+        if second_a == 1:
+            buff += 1
+            log_text = "Action "+str(turn_counter)+": The enemy moved and defended."
+        elif second_a == 2:
+            move += 1
+            log_text = "Action "+str(turn_counter)+": The enemy moved extra far."
+        else:
+            attack += 1
+            log_text = "Action "+str(turn_counter)+": The enemy moved and attacked."
+    else:
+        attack += 1
+        if second_a == 1:
+            buff += 1
+            log_text = "Action "+str(turn_counter)+": The enemy attacked and defended"
+        elif second_a == 2:
+            move += 1
+            log_text = "Action "+str(turn_counter)+": The enemy attacked and moved"
+        else:
+            attack += 1
+            log_text = "Action "+str(turn_counter)+": The enemy attacked twice"
+    return log_text, [move, buff, attack]
+
 class BadMech(Dreadnought):
-    def __init__(self, name, weapOne, weapTwo):
+    def __init__(self, weapOne, weapTwo):
                 super().__init__(
                     weapOne.name + " & " + weapTwo.name + " Mech",
-                    1000,
+                    20,
                     weapOne,
                     weapTwo,
                     )
@@ -28,7 +68,7 @@ class BadMech(Dreadnought):
                     "repairing",
                 ]
                 self.mechLevel = 1
-    def _Level_Up(self):
+    def Level_Up(self):
         level = self.mechLevel+1
         self.healthPoints = self.healthPoints * level
         self.mechLevel = level
@@ -81,20 +121,26 @@ class DecisionMaker:
         self.current_enemy = 0
         self.best_move = GridCounter()
         self.current_mech = self.world_state.enemyMech[self.current_enemy]
+        self.turns_since_move = 0
+        self.turns_since_defend = 0
     def Take_Action(self):
         self.current_enemy = self.world_state.Get_Current_Enemy()
         self.current_position = self.world_state.enemyMech[self.current_enemy]
-        defend = 25
-        move = 33
+        defend = 50 - (self.game_difficulty*20) + self.turns_since_defend
+        move = 50 - (self.game_difficulty*20) + self.turns_since_move
         #on random chance will defend
         if random.randint(1, 100) <= defend:
             self._Defense_Action()
+            self.turns_since_defend = 0
             return 1
         #on random chance will move
         if random.randint(1, 100) <= move:
             self._Move_Action()
+            self.turns_since_move = 0
             return 2
         #if didnt move or defend will choose best weapon to use
+        self.turns_since_move += 0.5
+        self.turns_since_defend += 0.5
         if self._Main_Is_Best():
             self._Attack_Action(self.world_state.enemyMech[self.current_enemy].leftWeapon)
             return 3
@@ -122,6 +168,11 @@ class DecisionMaker:
         #if main is best return true
         enemy = self.world_state.enemyMech[self.current_enemy]
         return enemy.leftWeapon.damage >= enemy.leftWeapon.damage
+    def Update_Difficulty(self, difficulty):
+        self.game_difficulty = difficulty
+        for mech in self.world_state.enemyMech:
+            mech.Level_Up()
+
 
 class GridCounter:
     def __init__(self):
@@ -152,15 +203,15 @@ class GridCounter:
     def Best_Move(self, position):
         spot = position[0]*3 + position[1]*1
         posible_moves = {
-        0:[0,1,3,4],
-        1:[0,1,2,3,4,5],
-        2:[0,1,4,5],
-        3:[0,1,3,4,6,7],
-        4:[0,1,2,3,4,5,6,7,8],
-        5:[1,2,4,5,7,8],
-        6:[3,4,6,7],
-        7:[3,4,5,6,7,8],
-        8:[4,5,7,8],
+        0:[1,3],
+        1:[0,2,4],
+        2:[1,5],
+        3:[0,4,6],
+        4:[1,3,5,7],
+        5:[2,4,8],
+        6:[3,7],
+        7:[4,6,8],
+        8:[5,7],
         }
         info = self.Percent_Matrix()
         move = posible_moves[spot]
