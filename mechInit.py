@@ -73,3 +73,5 @@ class MechInit:
 		self.enemyPosition[self.currentEnemy].player_position = spot
 	def Get_Current_Enemy(self):
 		return self.currentEnemy
+	def Get_Level(self):
+		return self.enemyMech[self.currentEnemy].mechLevel

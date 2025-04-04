@@ -15,7 +15,7 @@ import pygame as pg
 from loadBackground import load_background_image
 from playerGrid import PlayerGrid
 from playerMovement import PlayerMovement
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, GRID_ROWS, GRID_COLS, RED, WHITE, BLUE, GREEN
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, GRID_ROWS, GRID_COLS, RED, WHITE, BLUE, GREEN, ORANGE
 import mechInit
 import enemyai
 import menu
@@ -59,6 +59,7 @@ def run_grid_game():
     enemy_ai = enemyai.DecisionMaker(games_mechs, 1)
     enemies_turn = 0
     damage_timer = 0
+    enemy_attack_pattern = 0
 
     # cast to int for the click detections
     CELL_WIDTH = int((SCREEN_WIDTH // GRID_COLS) // 3)
@@ -79,6 +80,8 @@ def run_grid_game():
     # load the mech image
     player_image = pg.image.load('assets/placeholder_mech_image.jpeg')
     player_image = pg.transform.scale(player_image, (int(CELL_WIDTH * 1.5), int(CELL_HEIGHT * 1.5)))
+    enemy_image = pg.image.load('assets/placeholder_mech_image_reverse.jpeg')
+    enemy_image = pg.transform.scale(enemy_image, (int(CELL_WIDTH * 1.5), int(CELL_HEIGHT * 1.5)))
 
 
     is_player_turn = True
@@ -112,7 +115,7 @@ def run_grid_game():
             if enemy_logging:
                 for i in range(9):
                     combat_log[i] = combat_font.render(combat_log_text[i], 1, WHITE)
-                    screen.blit(combat_log[i], (SCREEN_WIDTH-210,(SCREEN_HEIGHT/2)-11*i))
+                    screen.blit(combat_log[i], (SCREEN_WIDTH-210,(SCREEN_HEIGHT/3)-11*i))
 
             #color timer for damage animation
             if damage_timer:
@@ -137,6 +140,19 @@ def run_grid_game():
                         else:
                             pg.draw.rect(screen, GREEN, rect.inflate(-CELL_WIDTH * 0.1, -CELL_HEIGHT * 0.1))
 
+            #show the damage pattern
+            if damage_timer:
+                for spot in enemy_attack_pattern:
+                    #flash orange for enemy attack pattern
+                    for row in range(GRID_ROWS):
+                        for col in range(GRID_COLS):
+                            extra_offset = row * (CELL_WIDTH * 0.3)  
+                            rect = pg.Rect(col * CELL_WIDTH + GRID_X_OFFSET - extra_offset,
+                                        row * CELL_HEIGHT + GRID_Y_OFFSET,
+                                        CELL_WIDTH, CELL_HEIGHT)
+                            if spot == (row, col):
+                                pg.draw.rect(screen, ORANGE, rect.inflate(-CELL_WIDTH * 0.1, -CELL_HEIGHT * 0.1))
+
             # positioning for the mech image, offset slightly to appear standing on the square
             player_row, player_col = player_grid.get_player_position()
             extra_offset = player_row * (CELL_WIDTH * 0.3)
@@ -159,11 +175,19 @@ def run_grid_game():
                                 CELL_WIDTH, CELL_HEIGHT)
                     pg.draw.rect(screen, WHITE, rect, 1)  # Draw grid outline
 
-                    # highlight player's cell if this is the current position.
+                    # highlight enemies's cell if this is the current position.
                     if games_mechs.Get_Enemy_Position() == (row, col):
-                        pg.draw.rect(screen, GREEN, rect.inflate(-CELL_WIDTH * 0.1, -CELL_HEIGHT * 0.1))
+                        pg.draw.rect(screen, RED, rect.inflate(-CELL_WIDTH * 0.1, -CELL_HEIGHT * 0.1))
 
-
+            # positioning for the enemy mech image same as above but reverse
+            enemy_row, enemy_col = games_mechs.Get_Enemy_Position()
+            extra_offset = enemy_row * (CELL_WIDTH * 0.3) + 500
+            cell_x = enemy_col * CELL_WIDTH + GRID_X_OFFSET + extra_offset
+            cell_y = enemy_row * CELL_HEIGHT + GRID_Y_OFFSET
+            img_width, img_height = enemy_image.get_size()
+            image_x = cell_x + (CELL_WIDTH - img_width) // 2
+            image_y = cell_y + (CELL_HEIGHT - img_height) // 2 - 50
+            screen.blit(enemy_image, (image_x, image_y))
 
 
             # draw the attack button
@@ -252,16 +276,27 @@ def run_grid_game():
 
             #enemyai takes enemies turn
             if not is_player_turn and enemies_turn:
+                games_mechs.playerPosition.player_position = player_grid.get_player_position()
                 first_a = enemy_ai.Take_Action()
                 second_a = enemy_ai.Take_Action()
+                enemy_attack_pattern = []
+                try:
+                    for attack in first_a:
+                        enemy_attack_pattern.append(attack)
+                except:
+                    pass
+                try:
+                    for attack in second_a:
+                        enemy_attack_pattern.append(attack)
+                except:
+                    pass
                 turn_counter += 1
                 for i in range(9):
                     combat_log_text[9-i] = combat_log_text[8-i]
                 combat_log_text[0], enemy_actions = enemyai.combat_log_text(first_a,
                                                              second_a, turn_counter)
-                if first_a or second_a == 3:
+                if enemy_actions[2]:
                     damage_timer = 20
-                print(enemy_actions)
 
                 enemies_turn = 0
                 is_player_turn = True #reset players turn
