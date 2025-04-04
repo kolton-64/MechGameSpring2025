@@ -6,7 +6,6 @@
 # from weapons import Bolter, MeleeWeapon1, AOEWeapon1
 # or 
 # from weapons import Weapon
-# (recommitted with PR... WP#7)
 
 class Weapon:
 	# add ammoCapacity for weapons requiring ammunition ?
@@ -58,7 +57,7 @@ class Bolter(Weapon):
 	def __init__(self):
 		super().__init__(
 			name = "Bolter", #placeholder
-			damage = 2, # temp
+			damage = 4, # temp
 			)
 
 	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
@@ -74,7 +73,7 @@ class MeleeWeapon1(Weapon):
 	def __init__(self):
 		super().__init__(
 			name = "MeleeWeapon1", #placeholder
-			damage = 2, # temp
+			damage = 4, # temp
 			)
 
 	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
@@ -91,7 +90,7 @@ class AOEWeapon1(Weapon): # will rename to either KrakMissileLauncher or FragMis
 	def __init__(self):
 		super().__init__(
 			name = "AOEWeapon1",
-			damage = 2, # temp
+			damage = 3, # temp
 			)
 
 	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
@@ -106,12 +105,12 @@ class AOEWeapon1(Weapon): # will rename to either KrakMissileLauncher or FragMis
 		return attackZoneOptions
 
 class AssaultCannon(Weapon):
-# weapon #4: AOEWeapon2(placeholder, Flamer, Assault-Cannon, etc.: , base dmg?, Multi-tile pattern attack(AOE).
+# weapon #4: Assault-Cannon: dmg: temp, hits any 2 vertical tiles
 
 	def __init__(self):
 		super().__init__(
 			name = "AssaultCannon",
-			damage = 2, # temp 
+			damage = 5, # temp 
 			)
 
 	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
@@ -123,3 +122,74 @@ class AssaultCannon(Weapon):
 			attackZoneOptions.append(attackZone1)
 			attackZoneOptions.append(attackZone2)
 		return attackZoneOptions
+
+class LasCannon(Weapon):
+# weapon #5: LasCannon: dmg: temp, hits any 2 horizontal tiles
+	def __init__(self):
+		super().__init__(
+			name = "LasCannon",
+			damage = 5, # temp 
+			)
+
+	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
+		# LasCannon for now hits any two tiles (adjacent) in the same row. (choosing from pairs of horizontally adjacent tiles)
+		attackZoneOptions = []
+		for row in range(3):
+			attackZone1 = {(row, 0), (row, 1)}
+			attackZone2 = {(row, 1), (row, 2)}
+			attackZoneOptions.append(attackZone1)
+			attackZoneOptions.append(attackZone2)
+
+		return attackZoneOptions
+
+class HeavyFlamer(Weapon):
+# weapon #6: HeavyFlamer: dmg: temp, hits diagonally, or anti-diagonally(reverse)
+	def __init__(self):
+		super().__init__(
+			name = "HeavyFlamer",
+			damage = 4, # temp 
+			)
+
+	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
+		# HeavyFlamer for now hits the diagonal of tiles from (top-left to bottom-right)
+		# 	or will hit the anti-diagonal(top-right to bottom-left)
+		attackZoneOptions = []
+		attackZone1_mainDiagonal = {(0, 0), (1, 1), (2, 2)}
+		attackZone2_antiDiagonal = {(0, 2), (1, 1), (2, 0)}
+		return [attackZone1_mainDiagonal, attackZone2_antiDiagonal]
+
+class MultiMelta(Weapon): # maybe change to ChainFist?
+# weapon #7: MultiMelta: dmg: temp, hits 1 center row tile, and 2 outer row tiles
+# 	2 outer row tiles hit (in other columns) depend on center shot.
+
+	def __init__(self):
+		super().__init__(
+			name = "MultiMelta",
+			damage = 4,
+			)
+
+	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
+		# MultiMelta will hit a center row tile + 2 tiles in the outer rows(in other columns)
+		# 	The outer row tiles hit will depend on which center row tile was selected.
+		# 	The center-row, center-column attack zone will have two options for which column the outer row tiles will be hit
+		attackZone1 = {(1, 0), (0, 1), (2, 1)}
+		attackZone2 = {(1, 1), (0, 0), (2, 0)}
+		attackZone3 = {(1, 1), (0, 2), (2, 2)}
+		attackZone4 = {(1, 2), (0, 1), (2, 1)}
+		return [attackZone1, attackZone2, attackZone3, attackZone4]
+
+class FragMissileLauncher(Weapon) # either add a KrakMissileLauncher, or change AOEWeapon1 to it.
+# weapon #8: FragMissileLauncher: dmg: temp, hits "plus" shape tile without center tile, or hits each corner tile.
+
+	def __init__(self):
+		super().__init__(
+			name = "FragMissileLauncher",
+			damage = 3,
+			)
+
+	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon
+		# FragMissileLauncher will hit either all tiles besides the center and corners tiles(plus shape),
+		# 	or will hit just the outer corner tiles
+		attackZone1 = {(0, 1), (1, 0), (1, 2), (2, 1)}
+		attackZone2 = {(0, 0), (0, 2), (2, 0), (2, 2)}
+		return [attackZone1, attackZone2]
