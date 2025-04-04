@@ -178,7 +178,7 @@ class MultiMelta(Weapon): # maybe change to ChainFist?
 		attackZone4 = {(1, 2), (0, 1), (2, 1)}
 		return [attackZone1, attackZone2, attackZone3, attackZone4]
 
-class FragMissileLauncher(Weapon) # either add a KrakMissileLauncher, or change AOEWeapon1 to it.
+class FragMissileLauncher(Weapon): # either add a KrakMissileLauncher, or change AOEWeapon1 to it.
 # weapon #8: FragMissileLauncher: dmg: temp, hits "plus" shape tile without center tile, or hits each corner tile.
 
 	def __init__(self):
