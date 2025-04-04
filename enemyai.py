@@ -142,18 +142,19 @@ class DecisionMaker:
         self.turns_since_move += 0.5
         self.turns_since_defend += 0.5
         if self._Main_Is_Best():
-            self._Attack_Action(self.world_state.enemyMech[self.current_enemy].leftWeapon)
-            return 3
-        self._Attack_Action(self.world_state.enemyMech[self.current_enemy].rightWeapon)
-        return 3
+            return self._Attack_Action(self.world_state.enemyMech[self.current_enemy].leftWeapon)
+        return self._Attack_Action(self.world_state.enemyMech[self.current_enemy].rightWeapon)
     def _Attack_Action(self, weapon):
         ''' DONT CALL THIS FUNCTION '''
         self.world_state.enemyMech[self.current_enemy].Change_Status("normal")
         hero = self.world_state.playerMech
         hero_position = self.world_state.playerPosition.get_player_position()
-        hero.healthPoints -= weapon.damage
+        hit_option = self._Does_Weapon_Hit(weapon.getWeaponAttackZoneOptions(), hero_position)
+        if hit_option:
+            hero.healthPoints -= weapon.damage
         if hero.healthPoints < 0:
             hero.healthPoints = 0
+        return hit_option
     def _Defense_Action(self):
         ''' DONT CALL THIS FUNCTION '''
         self.world_state.enemyMech[self.current_enemy].Change_Status("protected")
@@ -172,6 +173,14 @@ class DecisionMaker:
         self.game_difficulty = difficulty
         for mech in self.world_state.enemyMech:
             mech.Level_Up()
+    def _Does_Weapon_Hit(self, weapon_range, hero_pos):
+        for option in weapon_range:
+            for spot in option:
+                if spot == hero_pos:
+                    return option
+        return 0
+
+
 
 
 class GridCounter:
