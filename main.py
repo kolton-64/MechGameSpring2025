@@ -106,12 +106,6 @@ def run_grid_game():
 
             menuController.menuLoop(pg.event.get())
 
-
-            print("REINITIALIZING GAME")
-
-            #update mechs with current difficulty
-            enemy_ai.Update_Difficulty(gameState.getDifficulty())
-
             # Must reinitialize game every time we go back to the main menu
             # Reinitialize game elements
             player_grid = PlayerGrid()
@@ -128,6 +122,12 @@ def run_grid_game():
             combat_log = [0] * 10
             combat_log_text = [''] * 10
             combat_font = pg.font.SysFont('Comic Sans MS', 10)
+
+
+            #update mechs with current difficulty
+            enemy_ai.Update_Difficulty(gameState.getDifficulty())
+
+
 
         elif gameState.currentState() == game_state.State.GAME_OVER:
             print("GAME OVER!!")
