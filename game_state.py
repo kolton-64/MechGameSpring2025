@@ -10,6 +10,8 @@ class GameState:
 
 		# Menu active is set to true by default because game currently loads to menu
 		self.menuActive: bool = True	
+
+		self.gameOver: bool = False
 	
 	# Getters
 	def getDifficulty(self):
@@ -33,8 +35,6 @@ class GameState:
 	def setDifficulty(self, diff):
 		if(type(diff) == Difficulty):
 			self.difficulty = diff
-
-		
 	
 	def setMusicActive(self, active: bool):
 		self.musicActive = active
@@ -45,6 +45,9 @@ class GameState:
 	def setMenuActive(self, state: bool):
 		self.menuActive = state
 
+	def setGameOver(self, state: bool):
+		self.gameOver = state
+
 
 
 
@@ -52,10 +55,12 @@ class GameState:
 		state = None
 		if(self.menuActive and not self.gameActive):
 			state = State.MAIN_MENU
-		elif(not self.menuActive and self.gameActive):
+		elif(not self.menuActive and self.gameActive and not self.gameOver):
 			state = State.IN_GAME
-		elif(self.menuActive and self.gameActive):
+		elif(self.menuActive and self.gameActive and not self.gameOver):
 			state = State.PAUSED
+		elif(self.menuActive and self.gameOver):
+			state = State.GAME_OVER
 		return state
 
 
@@ -118,3 +123,4 @@ class State(Enum):
 	MAIN_MENU = 0
 	IN_GAME = 1
 	PAUSED = 2 
+	GAME_OVER = 3

@@ -98,6 +98,7 @@ def run_grid_game():
 
         # Initially load to the main menu
         if(gameState.currentState() == game_state.State.MAIN_MENU):
+            print("MAIN MENU")
 
             # The following menuLoop will pause the while loop until the menu is exited
             # Exiting to the main menu from in game menu, will bring us back to this code block
@@ -105,8 +106,33 @@ def run_grid_game():
 
             menuController.menuLoop(pg.event.get())
 
+            # Must reinitialize game every time we go back to the main menu
+            # Reinitialize game elements
+            player_grid = PlayerGrid()
+            player_movement = PlayerMovement(player_grid)
+            games_mechs = mechInit.MechInit()
+            enemy_ai = enemyai.DecisionMaker(games_mechs, 1)
+            enemies_turn = 0
+            damage_timer = 0
+            enemy_attack_pattern = 0
+
+            # reset enemy logging 
+            enemy_logging = 1
+            turn_counter = 0
+            combat_log = [0] * 10
+            combat_log_text = [''] * 10
+            combat_font = pg.font.SysFont('Comic Sans MS', 10)
+
+
             #update mechs with current difficulty
             enemy_ai.Update_Difficulty(gameState.getDifficulty())
+
+
+
+        elif gameState.currentState() == game_state.State.GAME_OVER:
+            print("GAME OVER!!")
+            menuController.menuLoop(pg.event.get())
+
         else:
             # background
             screen.blit(background_image, (0, 0))
@@ -302,7 +328,29 @@ def run_grid_game():
                 is_player_turn = True #reset players turn
                 action_points = 2
                 if games_mechs.playerMech.healthPoints <= 0:
-                    you_died_text = you_died_font.render('You have died!', 1, RED)
+                    #player has died
+                    gameState.setGameOver(True)
+                    gameState.setMenuActive(True)
+                    menuController.stage = 2
+
+                    # reinitialize game elements
+                    player_grid = PlayerGrid()
+                    player_movement = PlayerMovement(player_grid)
+                    games_mechs = mechInit.MechInit()
+                    enemy_ai = enemyai.DecisionMaker(games_mechs, 1)
+                    enemies_turn = 0
+                    damage_timer = 0
+                    enemy_attack_pattern = 0
+
+                    # reset enemy logging 
+
+                    enemy_logging = 1
+                    turn_counter = 0
+                    combat_log = [0] * 10
+                    combat_log_text = [''] * 10
+                    combat_font = pg.font.SysFont('Comic Sans MS', 10)
+
+                    # you_died_text = you_died_font.render('You have died!', 1, RED)
             screen.blit(you_died_text, (370,200))
 
             pg.display.flip()

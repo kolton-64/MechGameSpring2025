@@ -6,12 +6,14 @@ from enum import Enum
 import time
 import unittest
 from game_state import Difficulty
+from game_state import State
 
 class MenuType(Enum):
 	EMPTY = 0
 	MAIN = 1
 	DIFFICULTY = 2
 	IN_GAME = 3
+	GAME_OVER = 4
 
 
 
@@ -39,7 +41,7 @@ class MenuController:
 		self.currentMenu = MenuType.EMPTY
 		self.mainTheme = themes.THEME_BLUE
 
-		self.j = 0
+		# self.j = 0
 
 
 		# This is just a placeholder variable
@@ -64,7 +66,8 @@ class MenuController:
 		print("Menu Loop")
 
 		print("TESTING")
-		print(self.gameState.currentState())
+		print(f"CURRENT STATE: {self.gameState.currentState()}")
+
 
 		if self.menu == MenuType.EMPTY and self.gameState.getMenuActive():
 			match self.stage:
@@ -72,6 +75,10 @@ class MenuController:
 					self.setMenu(MenuType.MAIN)
 				case 1:
 					self.setMenu(MenuType.IN_GAME)
+				case 2:
+					self.setMenu(MenuType.GAME_OVER)
+
+		print(f"CURRRENT STATE: {self.gameState.currentState()}")
 		
 		if self.gameState.currentState().value == 1 and self.gameState.getMenuActive():
 			if(self.gameState.getMenuActive()): #james smells like cheese -Oscar
@@ -88,6 +95,9 @@ class MenuController:
 			case MenuType.IN_GAME:
 				self.currentMenu = MenuType.IN_GAME
 				self._initInGameMenu()
+			case MenuType.GAME_OVER:
+				self.currentMenu = MenuType.GAME_OVER
+				self._initGameOverMenu()
 
 	def drawMenu(self, events):
 		self.menu.update(events)
@@ -134,9 +144,11 @@ class MenuController:
 		# deactivate menu's
 		self.gameState.setMenuActive(False)
 		self.gameState.setGameActive(True)
+		self.gameState.setGameOver(False)
 
 
 		print(self.gameState.currentState())
+		print(f"DIFFICULTY: {self.gameState.getDifficulty()}")
 
 		print(" - Beginning game - ")
 		pygame_menu.events.EXIT
@@ -181,7 +193,7 @@ class MenuController:
 	def _setDifficulty(self, difficulty: Difficulty):
 		self.gameState.setDifficulty(difficulty)
 		print(" - Difficulty set to: ", self.gameState.getDifficulty())
-		self._initDifficultyMenu()
+		self._initMainMenu()
 
 	# In game menus
 	def _initInGameMenu(self):
@@ -195,7 +207,7 @@ class MenuController:
 		)
 
 		self.menu.add.button('Resume', self._resume)
-		self.menu.add.button('Quit', self._initMainMenu)
+		self.menu.add.button('Quit', self._returnToMainMenu)
 		self.menu.mainloop(self.screen)
 		print(" - Initialized in game menu - ")
 	
@@ -203,6 +215,13 @@ class MenuController:
 		self.gameState.setMusicActive(active)
 
 
+	def _returnToMainMenu(self):
+		self.stage = 0
+		self.menu.disable()
+		self.menu = MenuType.EMPTY
+		self.gameState.setMenuActive(True)
+		self.gameState.setGameActive(False)
+		self.gameState.setGameOver(False)
 
 	
 	def _resume(self):
@@ -210,6 +229,18 @@ class MenuController:
 		self.menu = MenuType.EMPTY
 		self.gameState.setMenuActive(False)
 
+	def _initGameOverMenu(self):
+		print(" - Initializing game over menu - ")
+		if(self.menu != MenuType.EMPTY):
+			self.menu.disable()
+		self.menu = pygame_menu.Menu(
+			"Game Over",
+			self.width / 2, self.height / 2,
+			theme=themes.THEME_DARK
+		)
+		self.menu.add.button('Play Again', self._play)
+		self.menu.add.button('Quit', self._returnToMainMenu)
+		self.menu.mainloop(self.screen)
 
 class TestMenuController(unittest.TestCase):
 	import game_state
