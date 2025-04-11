@@ -193,7 +193,7 @@ class MenuController:
 	def _setDifficulty(self, difficulty: Difficulty):
 		self.gameState.setDifficulty(difficulty)
 		print(" - Difficulty set to: ", self.gameState.getDifficulty())
-		self._initDifficultyMenu()
+		self._initMainMenu()
 
 	# In game menus
 	def _initInGameMenu(self):
