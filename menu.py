@@ -207,7 +207,7 @@ class MenuController:
 		)
 
 		self.menu.add.button('Resume', self._resume)
-		self.menu.add.button('Quit', self._initMainMenu)
+		self.menu.add.button('Quit', self._returnToMainMenu)
 		self.menu.mainloop(self.screen)
 		print(" - Initialized in game menu - ")
 	
@@ -215,6 +215,13 @@ class MenuController:
 		self.gameState.setMusicActive(active)
 
 
+	def _returnToMainMenu(self):
+		self.stage = 0
+		self.menu.disable()
+		self.menu = MenuType.EMPTY
+		self.gameState.setMenuActive(True)
+		self.gameState.setGameActive(False)
+		self.gameState.setGameOver(False)
 
 	
 	def _resume(self):
@@ -232,7 +239,7 @@ class MenuController:
 			theme=themes.THEME_DARK
 		)
 		self.menu.add.button('Play Again', self._play)
-		self.menu.add.button('Quit', self._initMainMenu)
+		self.menu.add.button('Quit', self._returnToMainMenu)
 		self.menu.mainloop(self.screen)
 
 class TestMenuController(unittest.TestCase):
