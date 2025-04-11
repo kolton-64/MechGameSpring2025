@@ -60,6 +60,7 @@ def run_grid_game():
     enemies_turn = 0
     damage_timer = 0
     enemy_attack_pattern = 0
+    player_act_seq = [0]*3
 
     # cast to int for the click detections
     CELL_WIDTH = int((SCREEN_WIDTH // GRID_COLS) // 3)
@@ -161,10 +162,7 @@ def run_grid_game():
 
                     # highlight player's cell if this is the current position.
                     if player_grid.get_player_position() == (row, col):
-                        if damage_timer:
-                            pg.draw.rect(screen, RED, rect.inflate(-CELL_WIDTH * 0.1, -CELL_HEIGHT * 0.1))
-                        else:
-                            pg.draw.rect(screen, GREEN, rect.inflate(-CELL_WIDTH * 0.1, -CELL_HEIGHT * 0.1))
+                        pg.draw.rect(screen, GREEN, rect.inflate(-CELL_WIDTH * 0.1, -CELL_HEIGHT * 0.1))
 
             #show the damage pattern
             if damage_timer:
@@ -245,6 +243,7 @@ def run_grid_game():
                             if action_points > 0:
                                 direction = KEY_TO_DIRECTION[event.key]
                                 player_movement.move_player(direction)
+                                player_act_seq[0] += 1
                                 action_points -= 1  # consume 1 action point for movement
                                 if action_points == 0:
                                     is_player_turn = False
@@ -263,6 +262,7 @@ def run_grid_game():
                         if ATTACK_BTN_RECT.collidepoint(mouse_x, mouse_y):
                             if action_points > 0:
                                 print("Attack action performed.")
+                                player_act_seq[2] += 1
                                 action_points -= 1
                                 if action_points == 0:
                                     is_player_turn = False
@@ -272,6 +272,7 @@ def run_grid_game():
                         elif DEFEND_BTN_RECT.collidepoint(mouse_x, mouse_y):
                             if action_points > 0:
                                 print("Defend action performed.")
+                                player_act_seq[1] += 1
                                 action_points -= 1
                                 if action_points == 0:
                                     is_player_turn = False
@@ -325,7 +326,13 @@ def run_grid_game():
                     damage_timer = 20
 
                 enemies_turn = 0
+                c_enemy = games_mechs.enemyMech[games_mechs.Get_Current_Enemy()]
+                while player_act_seq[2]:
+                    c_enemy.takeDamage(games_mechs.playerMech.leftWeapon.damage)
+                    player_act_seq[2] -= 1
                 is_player_turn = True #reset players turn
+                #refresh players actions
+                player_act_seq = [0]*3
                 action_points = 2
                 if games_mechs.playerMech.healthPoints <= 0:
                     #player has died
