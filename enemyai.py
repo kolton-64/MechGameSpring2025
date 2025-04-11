@@ -12,6 +12,7 @@ from weapons import AOEWeapon1
 from weapons import AssaultCannon
 
 def combat_log_text(first_a, second_a, turn_counter):
+    #set up variables for crafting combat text
     move = 0
     buff = 0
     attack = 0
@@ -54,7 +55,7 @@ def combat_log_text(first_a, second_a, turn_counter):
 class BadMech(Dreadnought):
     def __init__(self, weapOne, weapTwo):
                 super().__init__(
-                    weapOne.name + " & " + weapTwo.name + " Mech",
+                    "'"+weapOne.name + "&" + weapTwo.name+"'" + " Mech",
                     20,
                     weapOne,
                     weapTwo,
@@ -120,12 +121,14 @@ class DecisionMaker:
         self.game_difficulty = difficulty
         self.current_enemy = 0
         self.best_move = GridCounter()
+        self.best_attack = GridCounter()
         self.current_mech = self.world_state.enemyMech[self.current_enemy]
         self.turns_since_move = 0
         self.turns_since_defend = 0
     def Take_Action(self):
         self.current_enemy = self.world_state.Get_Current_Enemy()
         self.current_position = self.world_state.enemyMech[self.current_enemy]
+        self.best_attack.Update_Count(self.world_state.playerPosition.get_player_position())
         defend = 50 - (self.game_difficulty*20) + self.turns_since_defend
         move = 50 - (self.game_difficulty*20) + self.turns_since_move
         #on random chance will defend
@@ -146,11 +149,12 @@ class DecisionMaker:
         return self._Attack_Action(self.world_state.enemyMech[self.current_enemy].rightWeapon)
     def _Attack_Action(self, weapon):
         ''' DONT CALL THIS FUNCTION '''
+        attack_position = self.best_attack.Best_Attack()
         self.world_state.enemyMech[self.current_enemy].Change_Status("normal")
         hero = self.world_state.playerMech
         hero_position = self.world_state.playerPosition.get_player_position()
-        hit_option = self._Does_Weapon_Hit(weapon.getWeaponAttackZoneOptions(), hero_position)
-        if hit_option:
+        hits, hit_option = self._Does_Weapon_Hit(weapon.getWeaponAttackZoneOptions(), hero_position, attack_position)
+        if hits:
             hero.healthPoints -= weapon.damage
         if hero.healthPoints < 0:
             hero.healthPoints = 0
@@ -171,13 +175,17 @@ class DecisionMaker:
         return enemy.leftWeapon.damage >= enemy.leftWeapon.damage
     def Update_Difficulty(self, difficulty):
         self.game_difficulty = difficulty
-        for mech in self.world_state.enemyMech:
-            mech.Level_Up()
-    def _Does_Weapon_Hit(self, weapon_range, hero_pos):
+        for i in range(difficulty):
+            for mech in self.world_state.enemyMech:
+                mech.Level_Up()
+    def _Does_Weapon_Hit(self, weapon_range, hero_pos, attack_pos):
         for option in weapon_range:
             for spot in option:
-                if spot == hero_pos:
-                    return option
+                if spot == attack_pos:
+                    if spot == hero_pos:
+                        return 1, option
+                    else:
+                        return 0, option
         return 0
 
 
@@ -237,3 +245,15 @@ class GridCounter:
         new_move = (math.floor(bestmove/3),bestmove%3)
         self.Update_Count(new_move)
         return new_move
+    def Best_Attack(self):
+        chance = 1
+        besthit = 4
+        for spot,likely in enumerate(self.Percent_Matrix()):
+            if likely < chance:
+                chance = likely
+                besthit = spot
+            elif math.isclose(likely, chance):
+               if random.randint(0, 1):
+                    chance = likely
+                    besthit = spot 
+        return (math.floor(besthit/3),besthit % 3)
