@@ -8,8 +8,30 @@
 # from weapons import Weapon
 
 class Weapon:
-	# add ammoCapacity for weapons requiring ammunition ?
+	
 	# add weaponPairSpecialAttack ?
+	WEAPON_PAIR_SYNERGY_MAP = { # Weapon-pair synergy dictionary at classwide level, frozenset for mapping
+		frozenset(["Bolter", "MeleeWeapon1"]): { # weapons in synergy
+		"nameOfSynergy": "Classic Combo", # synergy name
+		"bonusDamage": 2 # extra damage granted to both weapons (for now)
+		},
+
+		frozenset(["HeavyFlamer", "MultiMelta"]): { 
+		"nameOfSynergy": "Cookout Combo",
+		"bonusDamage": 1
+		},
+
+		frozenset(["AssaultCannon", "LasCannon"]): {
+		"nameOfSynergy": "Siege Synergy",
+		"bonusDamage": 2
+		},
+
+		frozenset(["AOEWeapon1", "FragMissileLauncher"]): {
+		"nameOfSynergy": "Explosion Synergy",
+		"bonusDamage": 1
+		}
+
+	}
 
 	def __init__(self, name, damage): #weaponRange
 		self.name = name # str - weapon's name
@@ -19,7 +41,6 @@ class Weapon:
 		return []
 
 	def weaponAttack(self, selectedAttackZone, occupantPosition, targetDreadnought):
-		# temporary basic weapon attack logic, text
 		# attempts hit occupantPosition if it is within the selected attack zone.
 		# if so, the weapon deals its damage to the targetDreadnought in the occupantPosition (subtract hp)
 		# otherwise, the attack is a miss (print for now)
@@ -49,6 +70,12 @@ class Weapon:
 					rowRepr.append("0")
 			print(" ".join(rowRepr))
 		print()
+
+	@staticmethod # (Doesnt need instance)
+	def getSynergyForWeaponPair(weaponA, weaponB):
+		# returns the weapon synergy of the given weapons, if valid.
+		weaponPair = frozenset([weaponA.name, weaponB.name])
+		return Weapon.WEAPON_PAIR_SYNERGY_MAP.get(weaponPair, None)
 
 
 class Bolter(Weapon):
@@ -158,7 +185,7 @@ class HeavyFlamer(Weapon):
 		attackZone2_antiDiagonal = {(0, 2), (1, 1), (2, 0)}
 		return [attackZone1_mainDiagonal, attackZone2_antiDiagonal]
 
-class MultiMelta(Weapon): # maybe change to ChainFist?
+class MultiMelta(Weapon):
 # weapon #7: MultiMelta: dmg: temp, hits 1 center row tile, and 2 outer row tiles
 # 	2 outer row tiles hit (in other columns) depend on center shot.
 
@@ -193,3 +220,19 @@ class FragMissileLauncher(Weapon): # either add a KrakMissileLauncher, or change
 		attackZone1 = {(0, 1), (1, 0), (1, 2), (2, 1)}
 		attackZone2 = {(0, 0), (0, 2), (2, 0), (2, 2)}
 		return [attackZone1, attackZone2]
+
+class ChainFist(Weapon):
+# weapon #9: ChainFist: dmg: temp, hits 2 tiles in the first column, and then a 3rd in the second column.
+
+	def __init__(self):
+		super().__init__(
+			name = "ChainFist",
+			damage = 3,
+			)
+
+	def getWeaponAttackZoneOptions(self): # possible attackZones for weapon (corners of the front board)
+		attackZone1 = {(0, 0), (1, 0), (0, 1)}
+		attackZone2 = {(0, 0), (1, 0), (1, 1)}
+		attackZone3 = {(1, 0), (2, 0), (2, 1)}
+		attackZone4 = {(1, 0), (2, 0), (1, 1)}
+
