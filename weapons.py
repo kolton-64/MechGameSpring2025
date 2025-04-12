@@ -235,4 +235,5 @@ class ChainFist(Weapon):
 		attackZone2 = {(0, 0), (1, 0), (1, 1)}
 		attackZone3 = {(1, 0), (2, 0), (2, 1)}
 		attackZone4 = {(1, 0), (2, 0), (1, 1)}
+		return [attackZone1, attackZone2, attackZone3, attackZone4]
 
