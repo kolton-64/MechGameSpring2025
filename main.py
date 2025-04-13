@@ -12,6 +12,8 @@ PyGame learning -
 
 '''
 import pygame as pg
+import random
+import math
 from loadBackground import load_background_image
 from playerGrid import PlayerGrid
 from playerMovement import PlayerMovement
@@ -20,6 +22,9 @@ import mechInit
 import enemyai
 import menu
 import game_state
+from weapons import Bolter, MeleeWeapon1, AOEWeapon1
+from attack_zone_dynamic_change import get_adjusted_attack_zone
+
 
 def run_grid_game():
     pg.init()
@@ -84,15 +89,27 @@ def run_grid_game():
     enemy_image = pg.image.load('assets/placeholder_mech_image_reverse.jpeg')
     enemy_image = pg.transform.scale(enemy_image, (int(CELL_WIDTH * 1.5), int(CELL_HEIGHT * 1.5)))
 
+        # --- Weapon Selection ---
+    available_weapons = [Bolter(), MeleeWeapon1(), AOEWeapon1()]
+    selected_weapons = random.sample(available_weapons, 2)
+    primary_weapon = selected_weapons[0]
+    secondary_weapon = selected_weapons[1]
+
+        # --- Define UI Button Rectangles ---
+    # Two attack buttons for the mech's left and right weapons.
+    PRIMARY_ATTACK_BTN_RECT = pg.Rect(SCREEN_WIDTH - 450, SCREEN_HEIGHT - 100, 180, 60)
+    SECONDARY_ATTACK_BTN_RECT = pg.Rect(SCREEN_WIDTH - 250, SCREEN_HEIGHT - 100, 180, 60)
+    # New defend button.
+    DEFEND_BTN_RECT = pg.Rect(SCREEN_WIDTH - 350, SCREEN_HEIGHT - 180, 180, 60)
+    
+    primary_attack_font = pg.font.SysFont('Comic Sans MS', 30)
+    secondary_attack_font = pg.font.SysFont('Comic Sans MS', 30)
+    defend_font = pg.font.SysFont('Comic Sans MS', 30)
 
     is_player_turn = True
     action_points = 2
 
-    #attack and defend buttons
-    ATTACK_BTN_RECT = pg.Rect(SCREEN_WIDTH - 200, SCREEN_HEIGHT - 100, 180, 60)
-    attack_font = pg.font.SysFont('Comic Sans MS', 30)
-    DEFEND_BTN_RECT = pg.Rect(SCREEN_WIDTH - 200, SCREEN_HEIGHT - 180, 180, 60)
-    defend_font = pg.font.SysFont('Comic Sans MS', 30)
+    hover_weapon = None
 
     running = True
     while running:
@@ -216,18 +233,46 @@ def run_grid_game():
 
             # draw the attack button
             if is_player_turn:
-                pg.draw.rect(screen, BLUE, ATTACK_BTN_RECT)
-                attack_text = attack_font.render("Attack", True, WHITE)
-                text_rect = attack_text.get_rect(center=ATTACK_BTN_RECT.center)
-                screen.blit(attack_text, text_rect)
-                #draw the defend button
+                # Draw Primary Attack button.
+                pg.draw.rect(screen, BLUE, PRIMARY_ATTACK_BTN_RECT)
+                primary_attack_text = primary_attack_font.render("Left Hand Attack", True, WHITE)
+                primary_text_rect = primary_attack_text.get_rect(center=PRIMARY_ATTACK_BTN_RECT.center)
+                screen.blit(primary_attack_text, primary_text_rect)
+                # Draw Secondary Attack button.
+                pg.draw.rect(screen, BLUE, SECONDARY_ATTACK_BTN_RECT)
+                secondary_attack_text = secondary_attack_font.render("Right Hand Attack", True, WHITE)
+                secondary_text_rect = secondary_attack_text.get_rect(center=SECONDARY_ATTACK_BTN_RECT.center)
+                screen.blit(secondary_attack_text, secondary_text_rect)
+                # Draw Defend button.
                 pg.draw.rect(screen, BLUE, DEFEND_BTN_RECT)
                 defend_text = defend_font.render("Defend", True, WHITE)
                 defend_text_rect = defend_text.get_rect(center=DEFEND_BTN_RECT.center)
                 screen.blit(defend_text, defend_text_rect)
 
 
-
+            #weapon hovering highlights the range
+            hover_weapon = None
+            mx, my = pg.mouse.get_pos()
+            if PRIMARY_ATTACK_BTN_RECT.collidepoint(mx, my):
+                hover_weapon = "primary"
+            elif SECONDARY_ATTACK_BTN_RECT.collidepoint(mx, my):
+                hover_weapon = "secondary"
+            else:
+                hover_weapon = None
+            if hover_weapon is not None:
+                if hover_weapon == "primary":
+                    base_attack_zone = primary_weapon.getWeaponAttackZoneOptions()[0]
+                elif hover_weapon == "secondary":
+                    base_attack_zone = secondary_weapon.getWeaponAttackZoneOptions()[0]
+                player_pos = player_grid.get_player_position()
+                adjusted_attack_zone = get_adjusted_attack_zone(base_attack_zone, player_pos, default_position=(1,1))
+                for (r, c) in adjusted_attack_zone:
+                    extra_offset = r * (CELL_WIDTH * 0.3)
+                    enemy_rect = pg.Rect(c * CELL_WIDTH + GRID_X_OFFSET + extra_offset + 500,
+                                         r * CELL_HEIGHT + GRID_Y_OFFSET,
+                                         CELL_WIDTH, CELL_HEIGHT)
+                    pg.draw.rect(screen, ORANGE, enemy_rect.inflate(-CELL_WIDTH * 0.1, -CELL_HEIGHT * 0.1))
+            
             # event handling
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -259,11 +304,30 @@ def run_grid_game():
                     if is_player_turn:
                         mouse_x, mouse_y = pg.mouse.get_pos()
                         # attack button clicked
-                        if ATTACK_BTN_RECT.collidepoint(mouse_x, mouse_y):
+                        if PRIMARY_ATTACK_BTN_RECT.collidepoint(mouse_x, mouse_y):
                             if action_points > 0:
-                                print("Attack action performed.")
-                                player_act_seq[2] += 1
+                                print("Left Hand Attack action performed.")
                                 action_points -= 1
+                                enemy_pos = games_mechs.Get_Enemy_Position()
+                                base_attack_zone = primary_weapon.getWeaponAttackZoneOptions()[0]
+                                player_pos = player_grid.get_player_position()
+                                adjusted_attack_zone = get_adjusted_attack_zone(base_attack_zone, player_pos, default_position=(1,1))
+                                if enemy_pos in adjusted_attack_zone:
+                                    games_mechs.enemyMech[0].takeDamage(primary_weapon.damage)
+                                if action_points == 0:
+                                    is_player_turn = False
+                                    enemies_turn = 1
+                                    damage_timer = 0
+                        elif SECONDARY_ATTACK_BTN_RECT.collidepoint(mouse_x, mouse_y):
+                            if action_points > 0:
+                                print("Right Hand Attack action performed.")
+                                action_points -= 1
+                                enemy_pos = games_mechs.Get_Enemy_Position()
+                                base_attack_zone = secondary_weapon.getWeaponAttackZoneOptions()[0]
+                                player_pos = player_grid.get_player_position()
+                                adjusted_attack_zone = get_adjusted_attack_zone(base_attack_zone, player_pos, default_position=(1,1))
+                                if enemy_pos in adjusted_attack_zone:
+                                    games_mechs.enemyMech[0].takeDamage(secondary_weapon.damage)
                                 if action_points == 0:
                                     is_player_turn = False
                                     enemies_turn = 1
