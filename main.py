@@ -17,12 +17,12 @@ import math
 from loadBackground import load_background_image
 from playerGrid import PlayerGrid
 from playerMovement import PlayerMovement
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, GRID_ROWS, GRID_COLS, RED, WHITE, BLUE, GREEN, ORANGE
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, GRID_ROWS, GRID_COLS, RED, WHITE, BLUE, GREEN, ORANGE, TOP_BAR_HEIGHT
 import mechInit
 import enemyai
 import menu
 import game_state
-from weapons import Bolter, MeleeWeapon1, AOEWeapon1
+from weapons import Bolter, MeleeWeapon1, AOEWeapon1, HeavyFlamer, ChainFist, MultiMelta,LasCannon, AssaultCannon, FragMissileLauncher
 from attack_zone_dynamic_change import get_adjusted_attack_zone
 
 
@@ -89,22 +89,23 @@ def run_grid_game():
     enemy_image = pg.image.load('assets/placeholder_mech_image_reverse.jpeg')
     enemy_image = pg.transform.scale(enemy_image, (int(CELL_WIDTH * 1.5), int(CELL_HEIGHT * 1.5)))
 
-        # --- Weapon Selection ---
-    available_weapons = [Bolter(), MeleeWeapon1(), AOEWeapon1()]
+    #randomly selected the primary and secondary weapons for the mech player, they will be unique
+    available_weapons = [Bolter(), MeleeWeapon1(), AOEWeapon1(),AssaultCannon(),LasCannon(), HeavyFlamer(), MultiMelta(), FragMissileLauncher(),ChainFist()]
     selected_weapons = random.sample(available_weapons, 2)
     primary_weapon = selected_weapons[0]
     secondary_weapon = selected_weapons[1]
 
-        # --- Define UI Button Rectangles ---
     # Two attack buttons for the mech's left and right weapons.
-    PRIMARY_ATTACK_BTN_RECT = pg.Rect(SCREEN_WIDTH - 450, SCREEN_HEIGHT - 100, 180, 60)
-    SECONDARY_ATTACK_BTN_RECT = pg.Rect(SCREEN_WIDTH - 250, SCREEN_HEIGHT - 100, 180, 60)
-    # New defend button.
-    DEFEND_BTN_RECT = pg.Rect(SCREEN_WIDTH - 350, SCREEN_HEIGHT - 180, 180, 60)
+    btn_w, btn_h = 180, 60
+    pad = (TOP_BAR_HEIGHT - btn_h) // 2
+    PRIMARY_ATTACK_BTN_RECT   = pg.Rect( 350,pad, btn_w, btn_h)
+    SECONDARY_ATTACK_BTN_RECT = pg.Rect(550,pad, btn_w, btn_h)
+    # Defend button
+    DEFEND_BTN_RECT= pg.Rect(750,pad, btn_w, btn_h)
     
-    primary_attack_font = pg.font.SysFont('Comic Sans MS', 30)
-    secondary_attack_font = pg.font.SysFont('Comic Sans MS', 30)
-    defend_font = pg.font.SysFont('Comic Sans MS', 30)
+    primary_attack_font = pg.font.SysFont('Comic Sans MS', 24)
+    secondary_attack_font = pg.font.SysFont('Comic Sans MS', 24)
+    defend_font = pg.font.SysFont('Comic Sans MS', 24)
 
     is_player_turn = True
     action_points = 2
@@ -155,6 +156,15 @@ def run_grid_game():
             # background
             screen.blit(background_image, (0, 0))
 
+            top_bar_rect = pg.Rect(
+                0,
+                0,
+                SCREEN_WIDTH,
+                TOP_BAR_HEIGHT
+            )
+            screen.fill((0, 0, 0), top_bar_rect)
+
+
             #enemy combat log
             if enemy_logging:
                 for i in range(9):
@@ -166,7 +176,6 @@ def run_grid_game():
                 damage_timer -= 1
 
             # grid and highlight
-            # Inside your main game loop for drawing:
             for row in range(GRID_ROWS):
                 for col in range(GRID_COLS):
                     # offset for angeled grid
@@ -231,26 +240,26 @@ def run_grid_game():
             screen.blit(enemy_image, (image_x, image_y))
 
 
-            # draw the attack button
+            # draw the attack buttons for left and right 'hand'
             if is_player_turn:
-                # Draw Primary Attack button.
+                # Draw Primary Attack button
                 pg.draw.rect(screen, BLUE, PRIMARY_ATTACK_BTN_RECT)
-                primary_attack_text = primary_attack_font.render("Left Hand Attack", True, WHITE)
+                primary_attack_text = primary_attack_font.render("Left Attack", True, WHITE)
                 primary_text_rect = primary_attack_text.get_rect(center=PRIMARY_ATTACK_BTN_RECT.center)
                 screen.blit(primary_attack_text, primary_text_rect)
-                # Draw Secondary Attack button.
+                # Draw Secondary Attack button
                 pg.draw.rect(screen, BLUE, SECONDARY_ATTACK_BTN_RECT)
-                secondary_attack_text = secondary_attack_font.render("Right Hand Attack", True, WHITE)
+                secondary_attack_text = secondary_attack_font.render("Right Attack", True, WHITE)
                 secondary_text_rect = secondary_attack_text.get_rect(center=SECONDARY_ATTACK_BTN_RECT.center)
                 screen.blit(secondary_attack_text, secondary_text_rect)
-                # Draw Defend button.
+                # Draw Defend bytton
                 pg.draw.rect(screen, BLUE, DEFEND_BTN_RECT)
                 defend_text = defend_font.render("Defend", True, WHITE)
                 defend_text_rect = defend_text.get_rect(center=DEFEND_BTN_RECT.center)
                 screen.blit(defend_text, defend_text_rect)
 
 
-            #weapon hovering highlights the range
+            #hovering your mouse over a weapon attack button will now highlight the attack zone of that weapon based off your position
             hover_weapon = None
             mx, my = pg.mouse.get_pos()
             if PRIMARY_ATTACK_BTN_RECT.collidepoint(mx, my):

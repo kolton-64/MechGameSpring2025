@@ -109,7 +109,7 @@ class MeleeWeapon1(Weapon):
 		col0 = {(0, 0), (1, 0), (2, 0)}
 		col1 = {(0, 1), (1, 1), (2, 1)}
 		col2 = {(0, 2), (1, 2), (2, 2)}
-		return [col0, col1, col2]
+		return [col1, col0, col2]
 
 class AOEWeapon1(Weapon): # will rename to either KrakMissileLauncher or FragMissileLauncher, then add the latter.
 # weapon#3: name: AOEWeapon1, dmg: temp, attackZone: AOE/Concentrated explosion,
@@ -203,7 +203,7 @@ class MultiMelta(Weapon):
 		attackZone2 = {(1, 1), (0, 0), (2, 0)}
 		attackZone3 = {(1, 1), (0, 2), (2, 2)}
 		attackZone4 = {(1, 2), (0, 1), (2, 1)}
-		return [attackZone1, attackZone2, attackZone3, attackZone4]
+		return [attackZone2, attackZone1, attackZone3, attackZone4]
 
 class FragMissileLauncher(Weapon): # either add a KrakMissileLauncher, or change AOEWeapon1 to it.
 # weapon #8: FragMissileLauncher: dmg: temp, hits "plus" shape tile without center tile, or hits each corner tile.
