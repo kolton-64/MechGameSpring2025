@@ -1,6 +1,7 @@
 # Screen dimensions
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
+TOP_BAR_HEIGHT = 75
 
 # Grid settings
 GRID_ROWS = 3
