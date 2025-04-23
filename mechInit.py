@@ -4,7 +4,7 @@
 import random
 from dreadnought import Dreadnought
 from playerGrid import PlayerGrid
-from weapons import Weapon
+from weapons import ChainFist, FragMissileLauncher, HeavyFlamer, LasCannon, MultiMelta, Weapon
 from weapons import Bolter
 from weapons import MeleeWeapon1
 from weapons import AOEWeapon1
@@ -39,13 +39,23 @@ class MechInit:
 	#method used for choosing how to construct the NPC mechs with random
 	#weapons
 	def Random_Weapon(self):
-		choice = random.randint(1, 4)
+		choice = random.randint(1, 9)
 		if choice == 1:
 			return Bolter()
 		elif choice == 2:
 			return MeleeWeapon1()
 		elif choice == 3:
 			return AOEWeapon1()
+		elif choice == 4:
+			return LasCannon()
+		elif choice == 5:
+			return HeavyFlamer()
+		elif choice == 6:
+			return MultiMelta()
+		elif choice == 7:
+			return FragMissileLauncher()
+		elif choice == 8:
+			return ChainFist()
 		else:
 			return AssaultCannon()
 	def Set_Difficulty(self, difficulty):
