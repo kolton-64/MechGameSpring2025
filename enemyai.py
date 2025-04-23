@@ -85,17 +85,6 @@ class BadMech(Dreadnought):
         self.healthPoints = self.healthPoints * level
         self.mechLevel = level
         return 0, ""
-    def Weapon_Change(self, hand):
-        if not isinstance(level, int):
-            errStr = """error: expected argument of type int.
-             did not recieve argument of type int"""
-            return -1, errStr
-        assert isinstance(level, int) 
-        if hand:
-            self.leftWeapon = Random_Weapon()
-        else:
-            self.rightWeapon = Random_Weapon()
-        return 0, ""
     def Take_Damage(self, dmg):
         if self.mechStatus == "vulnerable":
             self.healthPoints -= (2*dmg)
@@ -179,14 +168,14 @@ class DecisionMaker:
             for mech in self.world_state.enemyMech:
                 mech.Level_Up()
     def _Does_Weapon_Hit(self, weapon_range, hero_pos, attack_pos):
-        for option in weapon_range:
+        for option in list(weapon_range):
             for spot in option:
                 if spot == attack_pos:
                     if spot == hero_pos:
                         return 1, option
                     else:
                         return 0, option
-        return 0
+        return 0, (0,0,0)
 
 
 
@@ -202,7 +191,7 @@ class GridCounter:
         move = [0] * 9
         move[spot] = 1
         if (isinstance(move, list) and spot > 8):
-            return -1, """error: expected argument of type list with lenth of 
+            return -1, """error: expected argument of type list with lenth of
             9. did not recieve that"""
         move[spot] = 1
         self.space_count[spot] += 1
@@ -255,5 +244,5 @@ class GridCounter:
             elif math.isclose(likely, chance):
                if random.randint(0, 1):
                     chance = likely
-                    besthit = spot 
+                    besthit = spot
         return (math.floor(besthit/3),besthit % 3)
